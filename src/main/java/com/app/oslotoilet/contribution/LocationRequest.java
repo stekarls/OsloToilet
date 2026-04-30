@@ -3,8 +3,7 @@ package com.app.oslotoilet.contribution;
 
 import com.app.oslotoilet.user.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -12,6 +11,8 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "location_requests")
 public class LocationRequest {
