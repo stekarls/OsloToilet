@@ -13,6 +13,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "location_requests")
 public class LocationRequest {
@@ -47,6 +48,9 @@ public class LocationRequest {
 
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
+
+    @Column(name = "has_fee")
+    private boolean hasFee;
 
     @PreUpdate
     protected void onUpdate(){
