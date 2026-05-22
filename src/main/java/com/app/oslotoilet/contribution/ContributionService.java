@@ -5,6 +5,7 @@ import com.app.oslotoilet.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -55,6 +56,26 @@ public class ContributionService {
     public List<LocationRequestResponseDto> findByUserIdOrderByCreatedAtDesc(UUID userId){
         return contributionRepository.findByUserIdOrderByCreatedAtDesc(userId).stream().map(this::mapToResponseDto).toList();
     }
+
+    @Transactional
+    public LocationRequestResponseDto changeRequestStatus(UUID id, RequestStatus newStatus){
+
+        LocationRequest request = contributionRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id));
+
+        if (request.getRequestStatus() == RequestStatus.APPROVED){
+            throw new IllegalStateException("Cannot modify a location request that has already been approved.");
+        }
+
+        request.setRequestStatus(newStatus);
+
+        if (newStatus == RequestStatus.APPROVED){
+            User user = request.getUser();
+            user.setContributionPoints(user.getContributionPoints() + 100);
+        }
+        return mapToResponseDto(request);
+    }
+
+
 
     private LocationRequest mapToEntity(LocationRequestDto locationRequestDto, User user){
         return LocationRequest.builder().user(user)

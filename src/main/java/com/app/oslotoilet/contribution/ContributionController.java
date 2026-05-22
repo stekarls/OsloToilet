@@ -49,4 +49,11 @@ public class ContributionController {
         }
         return contributionService.findByUserIdOrderByCreatedAtDesc(userId);
     }
+
+    @PutMapping("{id}")
+    public ResponseEntity<LocationRequestResponseDto> changeRequestStatus(@PathVariable UUID id, @RequestParam RequestStatus requestStatus){
+        LocationRequestResponseDto request = contributionService.changeRequestStatus(id, requestStatus);
+        return ResponseEntity.ok(request);
+    }
+
 }
