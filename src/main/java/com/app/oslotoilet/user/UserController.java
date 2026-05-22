@@ -1,6 +1,7 @@
 package com.app.oslotoilet.user;
 
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,21 +20,22 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> getAllUsers(){
+    public List<UserResponseDto> getAllUsers(){
         return userService.getAllUsers();
     }
 
+    @GetMapping("/contribution")
+    public List<UserResponseDto> sortByContributionPoints(){
+        return userService.sortByContributionPoints();
+    }
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable UUID id){
-        User user = userService.getUserById(id);
-        if (user != null){
+    public ResponseEntity<UserResponseDto> getUserById(@PathVariable UUID id){
+        UserResponseDto user = userService.getUserById(id);
             return ResponseEntity.ok(user);
-        }
-        return ResponseEntity.notFound().build();
     }
 
     @PostMapping("/create")
-    public ResponseEntity<User> createNewUser(@RequestBody User user){
+    public ResponseEntity<UserResponseDto> createNewUser(@RequestBody UserRequestDto user){
         return new ResponseEntity<>(userService.createNewUser(user), HttpStatus.CREATED);
     }
 
@@ -41,7 +43,13 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id){
         userService.deleteUserById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponseDto> updateUserById(@PathVariable UUID id, @Valid @RequestBody UserUpdateDto userUpdateDto){
+        UserResponseDto response = userService.updateUserById(id, userUpdateDto);
+        return ResponseEntity.ok(response);
+    }
+
 
 }

@@ -2,10 +2,7 @@ package com.app.oslotoilet.user;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -14,6 +11,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "users")
 public class User {
@@ -30,15 +28,5 @@ public class User {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
-
-    @PrePersist
-    public void prePersist() {
-        if (this.contributionPoints == null) {
-            this.contributionPoints = 0L;
-        }
-        if (this.createdAt == null){
-            this.createdAt = OffsetDateTime.now();
-        }
-    }
 
 }
