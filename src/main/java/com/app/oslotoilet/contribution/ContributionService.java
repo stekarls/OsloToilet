@@ -5,7 +5,6 @@ import com.app.oslotoilet.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.OffsetDateTime;
 import java.util.List;
