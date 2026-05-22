@@ -23,5 +23,5 @@ public class PaymentOption {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_option", nullable = false, unique = true, length = 50)
-    private PaymentCode code; // Dette er 'paymentOption' kolonnen i diagrammet
+    private PaymentCode code;
 }

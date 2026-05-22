@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Getter
@@ -47,4 +48,20 @@ public class Toilet {
     private boolean season;
 
     private Boolean closed;
+
+    @Column(updatable = false, nullable = false)
+    private OffsetDateTime added;
+
+    @Column(name = "last_updated", updatable = false, nullable = false)
+    private OffsetDateTime updated;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.added == null){
+            this.added = OffsetDateTime.now();
+        }
+        if (this.updated == null){
+            this.updated = OffsetDateTime.now();
+        }
+    }
 }

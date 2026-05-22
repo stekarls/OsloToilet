@@ -1,6 +1,7 @@
 package com.app.oslotoilet.user;
 
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,11 +34,14 @@ public class UserController {
 
     @PostMapping("/create")
     public ResponseEntity<User> createNewUser(@RequestBody User user){
-        userService.createNewUser(user);
-        return ResponseEntity.status(201).build();
+        return new ResponseEntity<>(userService.createNewUser(user), HttpStatus.CREATED);
     }
 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID id){
+        userService.deleteUserById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-
+    }
 
 }
