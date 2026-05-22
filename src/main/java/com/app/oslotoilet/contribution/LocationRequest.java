@@ -39,18 +39,21 @@ public class LocationRequest {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "request_status", nullable = false)
-    private RequestStatus requestStatus = RequestStatus.PENDING;
+    private RequestStatus requestStatus;
 
     private String adminComment;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt = OffsetDateTime.now();
+    private OffsetDateTime createdAt;
 
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
     @Column(name = "has_fee")
     private boolean hasFee;
+
+    @Column(precision = 10, scale = 2, nullable = false)
+    private BigDecimal fee;
 
     @PreUpdate
     protected void onUpdate(){

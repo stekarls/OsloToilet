@@ -1,7 +1,12 @@
 package com.app.oslotoilet.contribution;
 
+import com.app.oslotoilet.user.User;
+import com.app.oslotoilet.user.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,15 +14,21 @@ import java.util.UUID;
 public class ContributionService {
 
     private final ContributionRepository contributionRepository;
+    private final UserRepository userRepository;
 
-    public ContributionService(ContributionRepository contributionRepository){
+    public ContributionService(ContributionRepository contributionRepository, UserRepository userRepository){
         this.contributionRepository = contributionRepository;
+        this.userRepository = userRepository;
     }
 
-    public boolean createNewLocationRequest(LocationRequest locationRequest){
-        //TODO: Add business logic
-        contributionRepository.save(locationRequest);
-        return true;
+    @Transactional
+    public LocationRequestResponseDto createNewLocationRequest(LocationRequestDto locationRequest){
+        User user = userRepository.findById(locationRequest.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + locationRequest.getUserId()));
+
+        LocationRequest request = mapToEntity(locationRequest, user);
+        request = contributionRepository .save(request);
+
+        return mapToResponseDto(request);
     }
 
     public boolean deleteLocationRequestById(UUID id){
@@ -29,19 +40,52 @@ public class ContributionService {
         return false;
     }
 
-    public List<LocationRequest> getAllRequests(){
-        return contributionRepository.findAll();
+    public List<LocationRequestResponseDto> getAllRequests(){
+        return contributionRepository.findAllWithUser().stream().map(this::mapToResponseDto).toList();
     }
 
-    public List<LocationRequest> findByRequestStatus(RequestStatus requestStatus){
-        return contributionRepository.findByRequestStatus(requestStatus);
-    }
-    public List<LocationRequest> findByuserIdAndRequestStatus(UUID userId, RequestStatus requestStatus){
-        return contributionRepository.findByuserIdAndRequestStatus(userId, requestStatus);
+    public List<LocationRequestResponseDto> findByRequestStatus(RequestStatus requestStatus){
+        return contributionRepository.findByRequestStatus(requestStatus).stream().map(this::mapToResponseDto).toList();
     }
 
-    public List<LocationRequest> findByUserIdOrderByCreatedAtDesc(UUID userId){
-        return contributionRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    public List<LocationRequestResponseDto> findByuserIdAndRequestStatus(UUID userId, RequestStatus requestStatus){
+        return contributionRepository.findByuserIdAndRequestStatus(userId, requestStatus).stream().map(this::mapToResponseDto).toList();
+    }
+
+    public List<LocationRequestResponseDto> findByUserIdOrderByCreatedAtDesc(UUID userId){
+        return contributionRepository.findByUserIdOrderByCreatedAtDesc(userId).stream().map(this::mapToResponseDto).toList();
+    }
+
+    private LocationRequest mapToEntity(LocationRequestDto locationRequestDto, User user){
+        return LocationRequest.builder().user(user)
+                .name(locationRequestDto.getName())
+                .latitude(locationRequestDto.getLatitude())
+                .longitude(locationRequestDto.getLongitude())
+                .description(locationRequestDto.getDescription())
+                .hasFee(locationRequestDto.isHasFee())
+                .fee(locationRequestDto.getFee())
+                .adminComment("")
+                .requestStatus(RequestStatus.PENDING)
+                .createdAt(OffsetDateTime.now())
+                .updatedAt(OffsetDateTime.now())
+                .build();
+
+    }
+
+    private LocationRequestResponseDto mapToResponseDto(LocationRequest entity){
+        return LocationRequestResponseDto.builder()
+                .id(entity.getId())
+                .userId(entity.getUser().getId())
+                .name(entity.getName())
+                .latitude(entity.getLatitude())
+                .longitude(entity.getLongitude())
+                .description(entity.getDescription())
+                .requestStatus(entity.getRequestStatus())
+                .hasFee(entity.isHasFee())
+                .fee(entity.getFee())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .build();
     }
 
 

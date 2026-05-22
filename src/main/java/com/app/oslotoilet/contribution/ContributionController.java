@@ -1,6 +1,8 @@
 package com.app.oslotoilet.contribution;
 
 
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,20 +21,17 @@ public class ContributionController {
 
 
     @GetMapping
-    public List<LocationRequest> getRequests(@RequestParam(required = false) RequestStatus status){
+    public List<LocationRequestResponseDto> getRequests(@RequestParam(required = false) RequestStatus status){
         if (status != null){
             return contributionService.findByRequestStatus(status);
         }
         return contributionService.getAllRequests();
     }
 
-    @PostMapping("/new")
-    public ResponseEntity<Void> createNewLocationRequest(@RequestBody LocationRequest locationRequest){
-        //TODO: check https status codes, change to correct
-        if (contributionService.createNewLocationRequest(locationRequest)){
-            return ResponseEntity.status(201).build();
-        }
-        return ResponseEntity.badRequest().build();
+    @PostMapping("/create")
+    public ResponseEntity<LocationRequestResponseDto> createNewLocationRequest(@Valid @RequestBody LocationRequestDto locationRequest){
+        LocationRequestResponseDto response = contributionService.createNewLocationRequest(locationRequest);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
@@ -44,7 +43,7 @@ public class ContributionController {
     }
 
     @GetMapping("/{userId}")
-    public List<LocationRequest> getRequestsbyUser(@PathVariable UUID userId, @RequestParam(required = false) RequestStatus status){
+    public List<LocationRequestResponseDto> getRequestsByUser(@PathVariable UUID userId, @RequestParam(required = false) RequestStatus status){
         if (status != null){
             return contributionService.findByuserIdAndRequestStatus(userId, status);
         }
