@@ -43,9 +43,9 @@ public class ContributionController {
     }
 
     @GetMapping("/{userId}")
-    public List<LocationRequestResponseDto> getRequestsByUser(@PathVariable UUID userId, @RequestParam(required = false) RequestStatus status){
-        if (status != null){
-            return contributionService.findByuserIdAndRequestStatus(userId, status);
+    public List<LocationRequestResponseDto> getRequestsByUser(@PathVariable UUID userId, @RequestParam(required = false) RequestStatus requestStatus){
+        if (requestStatus != null){
+            return contributionService.findByuserIdAndRequestStatus(userId, requestStatus);
         }
         return contributionService.findByUserIdOrderByCreatedAtDesc(userId);
     }
