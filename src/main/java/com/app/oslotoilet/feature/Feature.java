@@ -1,6 +1,7 @@
 package com.app.oslotoilet.feature;
 
 
+import com.app.oslotoilet.enums.FeatureCode;
 import jakarta.persistence.*;
 import lombok.*;
 

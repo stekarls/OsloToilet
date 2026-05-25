@@ -1,5 +1,6 @@
 package com.app.oslotoilet.paymentOption;
 
+import com.app.oslotoilet.enums.PaymentCode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
