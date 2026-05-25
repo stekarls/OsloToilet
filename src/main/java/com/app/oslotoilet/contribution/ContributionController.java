@@ -51,8 +51,8 @@ public class ContributionController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<LocationRequestResponseDto> changeRequestStatus(@PathVariable UUID id, @RequestParam RequestStatus requestStatus){
-        LocationRequestResponseDto request = contributionService.changeRequestStatus(id, requestStatus);
+    public ResponseEntity<LocationRequestResponseDto> changeRequestStatus(@PathVariable UUID id, @RequestParam RequestStatus requestStatus, @RequestParam(required = false) String adminComment){
+        LocationRequestResponseDto request = contributionService.changeRequestStatus(id, requestStatus, adminComment);
         return ResponseEntity.ok(request);
     }
 

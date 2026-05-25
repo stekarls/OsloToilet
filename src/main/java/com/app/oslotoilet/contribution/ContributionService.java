@@ -57,13 +57,18 @@ public class ContributionService {
     }
 
     @Transactional
-    public LocationRequestResponseDto changeRequestStatus(UUID id, RequestStatus newStatus){
+    public LocationRequestResponseDto changeRequestStatus(UUID id, RequestStatus newStatus, String adminComment){
 
         LocationRequest request = contributionRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Location Request not found with ID: " + id));
 
         if (request.getRequestStatus() == RequestStatus.APPROVED){
             throw new IllegalStateException("Cannot modify a location request that has already been approved.");
         }
+
+        if(adminComment != null){
+            request.setAdminComment(adminComment);
+        }
+
 
         request.setRequestStatus(newStatus);
 
