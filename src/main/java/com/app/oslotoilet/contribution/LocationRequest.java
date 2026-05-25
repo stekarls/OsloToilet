@@ -1,6 +1,7 @@
 package com.app.oslotoilet.contribution;
 
 
+import com.app.oslotoilet.enums.RequestStatus;
 import com.app.oslotoilet.user.User;
 import jakarta.persistence.*;
 import lombok.*;

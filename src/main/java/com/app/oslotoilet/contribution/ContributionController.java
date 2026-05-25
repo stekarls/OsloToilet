@@ -1,6 +1,7 @@
 package com.app.oslotoilet.contribution;
 
 
+import com.app.oslotoilet.enums.RequestStatus;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

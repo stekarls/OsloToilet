@@ -1,7 +1,7 @@
 package com.app.oslotoilet.errorReport;
 
 
-import com.app.oslotoilet.contribution.RequestStatus;
+import com.app.oslotoilet.enums.RequestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
