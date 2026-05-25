@@ -59,7 +59,7 @@ public class ContributionService {
     @Transactional
     public LocationRequestResponseDto changeRequestStatus(UUID id, RequestStatus newStatus){
 
-        LocationRequest request = contributionRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id));
+        LocationRequest request = contributionRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Location Request not found with ID: " + id));
 
         if (request.getRequestStatus() == RequestStatus.APPROVED){
             throw new IllegalStateException("Cannot modify a location request that has already been approved.");

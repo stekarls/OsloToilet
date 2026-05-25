@@ -41,6 +41,7 @@ public class LocationRequest {
     @Column(name = "request_status", nullable = false)
     private RequestStatus requestStatus;
 
+    @Column(name = "admin_comment")
     private String adminComment;
 
     @Column(name = "created_at", nullable = false, updatable = false)
