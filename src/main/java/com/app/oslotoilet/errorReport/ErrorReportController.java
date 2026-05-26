@@ -1,6 +1,6 @@
 package com.app.oslotoilet.errorReport;
 
-import com.app.oslotoilet.contribution.RequestStatus;
+import com.app.oslotoilet.enums.RequestStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

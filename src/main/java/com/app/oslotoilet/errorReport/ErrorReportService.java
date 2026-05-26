@@ -1,7 +1,7 @@
 package com.app.oslotoilet.errorReport;
 
 
-import com.app.oslotoilet.contribution.RequestStatus;
+import com.app.oslotoilet.enums.RequestStatus;
 import com.app.oslotoilet.toilet.Toilet;
 import com.app.oslotoilet.toilet.ToiletRepository;
 import com.app.oslotoilet.user.User;

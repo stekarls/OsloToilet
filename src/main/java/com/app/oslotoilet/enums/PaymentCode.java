@@ -1,4 +1,4 @@
-package com.app.oslotoilet.paymentOption;
+package com.app.oslotoilet.enums;
 
 public enum PaymentCode {
     FREE,

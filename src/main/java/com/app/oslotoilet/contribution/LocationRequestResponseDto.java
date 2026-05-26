@@ -1,5 +1,6 @@
 package com.app.oslotoilet.contribution;
 
+import com.app.oslotoilet.enums.RequestStatus;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;

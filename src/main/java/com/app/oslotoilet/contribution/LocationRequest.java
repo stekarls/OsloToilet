@@ -1,6 +1,7 @@
 package com.app.oslotoilet.contribution;
 
 
+import com.app.oslotoilet.enums.RequestStatus;
 import com.app.oslotoilet.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -47,7 +48,7 @@ public class LocationRequest {
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
     @Column(name = "has_fee")

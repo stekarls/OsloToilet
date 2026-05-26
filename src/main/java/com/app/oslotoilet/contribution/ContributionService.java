@@ -1,11 +1,13 @@
 package com.app.oslotoilet.contribution;
 
+import com.app.oslotoilet.enums.RequestStatus;
 import com.app.oslotoilet.user.User;
 import com.app.oslotoilet.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -57,13 +59,18 @@ public class ContributionService {
     }
 
     @Transactional
-    public LocationRequestResponseDto changeRequestStatus(UUID id, RequestStatus newStatus){
+    public LocationRequestResponseDto changeRequestStatus(UUID id, RequestStatus newStatus, String adminComment){
 
         LocationRequest request = contributionRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Location Request not found with ID: " + id));
 
         if (request.getRequestStatus() == RequestStatus.APPROVED){
             throw new IllegalStateException("Cannot modify a location request that has already been approved.");
         }
+
+        if(adminComment != null){
+            request.setAdminComment(adminComment);
+        }
+
 
         request.setRequestStatus(newStatus);
 
@@ -77,19 +84,19 @@ public class ContributionService {
 
 
     private LocationRequest mapToEntity(LocationRequestDto locationRequestDto, User user){
+        BigDecimal fee = locationRequestDto.isHasFee() ? locationRequestDto.getFee() : BigDecimal.valueOf(0);
         return LocationRequest.builder().user(user)
                 .name(locationRequestDto.getName())
                 .latitude(locationRequestDto.getLatitude())
                 .longitude(locationRequestDto.getLongitude())
                 .description(locationRequestDto.getDescription())
                 .hasFee(locationRequestDto.isHasFee())
-                .fee(locationRequestDto.getFee())
+                .fee(fee)
                 .adminComment("")
                 .requestStatus(RequestStatus.PENDING)
                 .createdAt(OffsetDateTime.now())
                 .updatedAt(OffsetDateTime.now())
                 .build();
-
     }
 
     private LocationRequestResponseDto mapToResponseDto(LocationRequest entity){
