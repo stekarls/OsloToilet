@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ReviewDto {
+public class ReviewRequestDto {
     @NotNull(message = "Toilet ID is required")
     private UUID toiletId;
 

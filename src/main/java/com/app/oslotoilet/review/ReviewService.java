@@ -43,13 +43,13 @@ public class ReviewService {
 
 
     @Transactional
-    public ReviewResponseDto createReview(ReviewDto reviewDto){
+    public ReviewResponseDto createReview(ReviewRequestDto reviewRequestDto){
 
-        Toilet toilet = toiletRepository.findById(reviewDto.getToiletId()).orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
-        User user = userRepository.findById(reviewDto.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        Toilet toilet = toiletRepository.findById(reviewRequestDto.getToiletId()).orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
+        User user = userRepository.findById(reviewRequestDto.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
 
-        Review review = mapToEntity(reviewDto, user, toilet);
+        Review review = mapToEntity(reviewRequestDto, user, toilet);
         review = reviewRepository.save(review);
 
         return mapToResponseDto(review);
@@ -64,15 +64,15 @@ public class ReviewService {
 
 
 
-    private Review mapToEntity(ReviewDto reviewDto, User user, Toilet toilet){
-        double averageRating = getAverageRating(reviewDto.getCleanliness(), reviewDto.getAccess(), reviewDto.getEquipment());
+    private Review mapToEntity(ReviewRequestDto reviewRequestDto, User user, Toilet toilet){
+        double averageRating = getAverageRating(reviewRequestDto.getCleanliness(), reviewRequestDto.getAccess(), reviewRequestDto.getEquipment());
         return Review.builder()
                 .user(user)
                 .toilet(toilet)
-                .cleanliness(reviewDto.getCleanliness())
-                .access(reviewDto.getAccess())
-                .equipment(reviewDto.getEquipment())
-                .comment(reviewDto.getComment())
+                .cleanliness(reviewRequestDto.getCleanliness())
+                .access(reviewRequestDto.getAccess())
+                .equipment(reviewRequestDto.getEquipment())
+                .comment(reviewRequestDto.getComment())
                 .created(OffsetDateTime.now())
                 .averageRating(averageRating)
                 .build();
