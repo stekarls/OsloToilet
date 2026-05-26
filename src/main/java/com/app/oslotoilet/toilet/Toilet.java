@@ -2,6 +2,9 @@ package com.app.oslotoilet.toilet;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -22,12 +25,16 @@ public class Toilet {
     private UUID id;
 
     @Column(length = 128)
+    @Size(min = 5, message = "Name must be 5 characters in length or more")
+    @Size(max = 128, message = "Description cannot exceed 128 characters")
     private String name;
 
     @Column(precision = 9, scale = 6, nullable = false)
+    @DecimalMin("-90.0") @DecimalMax("90.0")
     private BigDecimal latitude;
 
     @Column(precision = 9, scale = 6, nullable = false)
+    @DecimalMin("-180.0") @DecimalMax("180.0")
     private BigDecimal longitude;
 
     @Column(name = "has_fee")
@@ -37,31 +44,26 @@ public class Toilet {
     private BigDecimal fee;
 
     @Column(columnDefinition = "TEXT")
+    @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
 
     @Column(name = "has_conditions")
-    private Boolean hasConditions;
+    private boolean hasConditions;
 
     @Column(columnDefinition = "TEXT")
+    @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String conditions;
 
-    private boolean season;
+    @Column(name = "is_seasonal")
+    private boolean isSeasonal;
 
-    private Boolean closed;
+    @Column(name = "is_closed")
+    private boolean isClosed;
 
     @Column(updatable = false, nullable = false)
     private OffsetDateTime added;
 
-    @Column(name = "last_updated", updatable = false, nullable = false)
-    private OffsetDateTime updated;
+    @Column(name = "updated_at", nullable = false)
+    private OffsetDateTime updatedAt;
 
-    @PrePersist
-    public void prePersist() {
-        if (this.added == null){
-            this.added = OffsetDateTime.now();
-        }
-        if (this.updated == null){
-            this.updated = OffsetDateTime.now();
-        }
-    }
 }

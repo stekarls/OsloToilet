@@ -7,6 +7,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -83,19 +84,19 @@ public class ContributionService {
 
 
     private LocationRequest mapToEntity(LocationRequestDto locationRequestDto, User user){
+        BigDecimal fee = locationRequestDto.isHasFee() ? locationRequestDto.getFee() : BigDecimal.valueOf(0);
         return LocationRequest.builder().user(user)
                 .name(locationRequestDto.getName())
                 .latitude(locationRequestDto.getLatitude())
                 .longitude(locationRequestDto.getLongitude())
                 .description(locationRequestDto.getDescription())
                 .hasFee(locationRequestDto.isHasFee())
-                .fee(locationRequestDto.getFee())
+                .fee(fee)
                 .adminComment("")
                 .requestStatus(RequestStatus.PENDING)
                 .createdAt(OffsetDateTime.now())
                 .updatedAt(OffsetDateTime.now())
                 .build();
-
     }
 
     private LocationRequestResponseDto mapToResponseDto(LocationRequest entity){

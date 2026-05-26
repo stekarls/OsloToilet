@@ -4,6 +4,7 @@ package com.app.oslotoilet.review;
 import com.app.oslotoilet.toilet.Toilet;
 import com.app.oslotoilet.user.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.OffsetDateTime;
@@ -24,26 +25,42 @@ public class Review {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "toilet_id", nullable = false)
+    @NotNull(message = "Toilet is required")
     private Toilet toilet;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @NotNull(message = "User is required")
     private User user;
 
     @Column(name = "rating_cleanliness")
-    private Integer cleanliness;
+    @Min(value = 0)
+    @Max(value = 5)
+    @NotNull(message = "Cleanliness rating is required")
+    private Byte cleanliness;
 
+    @Min(value = 0)
+    @Max(value = 5)
+    @NotNull(message = "Equipment rating is required")
     @Column(name = "rating_equipment")
-    private Integer equipment;
+    private Byte equipment;
 
+    @Min(value = 0)
+    @Max(value = 5)
+    @NotNull(message = "Access rating is required")
     @Column(name = "rating_access")
-    private Integer access;
+    private Byte access;
+
+    @Column(name = "average_rating")
+    private double averageRating;
+
 
     @Column(columnDefinition = "TEXT")
+    @Size(max = 1000, message = "Comment cannot exceed 1000 characters")
     private String comment;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime created = OffsetDateTime.now();
+    private OffsetDateTime created;
 
 
     public double getAverageRating(){
