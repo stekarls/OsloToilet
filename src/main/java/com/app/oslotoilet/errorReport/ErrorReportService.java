@@ -47,12 +47,12 @@ public class ErrorReportService {
         return mapToResponseDto(errorReport);
     }
 
-    public boolean deleteErrorReport(UUID id){
-        if (errorReportRepository.existsById(id)){
-            errorReportRepository.deleteById(id);
-            return true;
+    public void deleteErrorReport(UUID id){
+        if (!errorReportRepository.existsById(id)){
+            throw new EntityNotFoundException("Error report not found");
         }
-        return false;
+        errorReportRepository.deleteById(id);
+
     }
 
     @Transactional

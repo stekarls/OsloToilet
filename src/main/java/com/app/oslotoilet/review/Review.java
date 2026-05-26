@@ -62,9 +62,4 @@ public class Review {
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime created;
 
-
-    public double getAverageRating(){
-        return (cleanliness + equipment + access) / 3.0;
-    }
-
 }

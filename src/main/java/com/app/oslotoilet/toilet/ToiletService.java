@@ -68,6 +68,9 @@ public class ToiletService {
 
 
     public void deleteToilet(UUID id){
+        if (!toiletRepository.existsById(id)){
+            throw new EntityNotFoundException("Toilet not found");
+        }
         toiletRepository.deleteById(id);
     }
 

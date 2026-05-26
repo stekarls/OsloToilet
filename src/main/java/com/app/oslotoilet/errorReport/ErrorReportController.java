@@ -36,10 +36,9 @@ public class ErrorReportController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteErrorReport(@PathVariable UUID id){
-        if (errorReportService.deleteErrorReport(id)){
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        errorReportService.deleteErrorReport(id);
+        return ResponseEntity.noContent().build();
+
     }
 
     @PutMapping("/{id}")
