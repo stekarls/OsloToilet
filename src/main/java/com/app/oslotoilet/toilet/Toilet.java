@@ -1,6 +1,11 @@
 package com.app.oslotoilet.toilet;
 
 
+import com.app.oslotoilet.errorReport.ErrorReport;
+import com.app.oslotoilet.openingHours.OpeningHours;
+import com.app.oslotoilet.review.Review;
+import com.app.oslotoilet.toiletFeature.ToiletFeature;
+import com.app.oslotoilet.toiletPaymentOption.ToiletPaymentOption;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -9,6 +14,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -65,5 +72,25 @@ public class Toilet {
 
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
+
+    @OneToMany(mappedBy = "toilet", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ToiletFeature> features = new ArrayList<>();
+
+    @OneToMany(mappedBy = "toilet", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ToiletPaymentOption> paymentOptions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "toilet", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<OpeningHours> openingHours = new ArrayList<>();
+
+    @OneToMany(mappedBy = "toilet", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Review> reviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "toilet", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ErrorReport> errorReports = new ArrayList<>();
 
 }
