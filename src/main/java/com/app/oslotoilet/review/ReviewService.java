@@ -93,7 +93,7 @@ public class ReviewService {
                 .build();
     }
 
-    public double getAverageRating(Byte cleanliness, Byte equipment, Byte access){
+    public double getAverageRating(Short cleanliness, Short equipment, Short access){
         return (cleanliness + equipment + access) / 3.0;
     }
 }

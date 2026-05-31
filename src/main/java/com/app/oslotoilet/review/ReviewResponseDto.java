@@ -16,9 +16,9 @@ public class ReviewResponseDto {
     UUID toiletId;
     UUID userId;
     String userName;
-    Byte cleanliness;
-    Byte equipment;
-    Byte access;
+    Short cleanliness;
+    Short equipment;
+    Short access;
     double averageRating;
     String comment;
     OffsetDateTime created;

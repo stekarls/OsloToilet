@@ -23,15 +23,15 @@ public class ReviewRequestDto {
 
     @NotNull(message = "Cleanliness rating is required")
     @Min(value = 0) @Max(value = 5)
-    private Byte cleanliness;
+    private Short cleanliness;
 
     @NotNull(message = "Equipment rating is required")
     @Min(value = 0) @Max(value = 5)
-    private Byte equipment;
+    private Short equipment;
 
     @NotNull(message = "Access rating is required")
     @Min(value = 0) @Max(value = 5)
-    private Byte access;
+    private Short access;
 
     @Size(max = 1000, message = "Comment cannot exceed 1000 characters")
     private String comment;
