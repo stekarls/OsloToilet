@@ -27,6 +27,8 @@ import java.util.UUID;
 @Table(name = "toilets")
 public class Toilet {
 
+    //TODO: adde unique on name
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

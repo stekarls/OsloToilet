@@ -20,7 +20,7 @@ public class ToiletController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ToiletResponseDto>>findAll(@RequestParam String sort){
+    public ResponseEntity<List<ToiletResponseDto>>findAll(@RequestParam(required = false) String sort){
         return new ResponseEntity<>(toiletService.findAll(sort), HttpStatus.OK);
     }
 

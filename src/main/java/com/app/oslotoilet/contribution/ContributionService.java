@@ -1,6 +1,8 @@
 package com.app.oslotoilet.contribution;
 
 import com.app.oslotoilet.enums.RequestStatus;
+import com.app.oslotoilet.toilet.ToiletRequestDto;
+import com.app.oslotoilet.toilet.ToiletService;
 import com.app.oslotoilet.user.User;
 import com.app.oslotoilet.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -17,10 +19,12 @@ public class ContributionService {
 
     private final ContributionRepository contributionRepository;
     private final UserRepository userRepository;
+    private final ToiletService toiletService;
 
-    public ContributionService(ContributionRepository contributionRepository, UserRepository userRepository){
+    public ContributionService(ContributionRepository contributionRepository, UserRepository userRepository, ToiletService toiletService){
         this.contributionRepository = contributionRepository;
         this.userRepository = userRepository;
+        this.toiletService = toiletService;
     }
 
     @Transactional
@@ -71,13 +75,27 @@ public class ContributionService {
             request.setAdminComment(adminComment);
         }
 
-
         request.setRequestStatus(newStatus);
 
         if (newStatus == RequestStatus.APPROVED){
             User user = request.getUser();
             user.setContributionPoints(user.getContributionPoints() + 100);
         }
+
+        ToiletRequestDto newToilet = ToiletRequestDto.builder()
+                .name(request.getName())
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
+                .hasFee(request.isHasFee())
+                .fee(request.getFee())
+                .description(request.getDescription())
+                .hasConditions(false)
+                .isSeasonal(false)
+                .isClosed(false)
+                .build();
+
+        toiletService.createToilet(newToilet);
+
         return mapToResponseDto(request);
     }
 
