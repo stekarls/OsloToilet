@@ -16,7 +16,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "reviews")
+@Table(name = "reviews", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"toilet_id", "user_id"})
+})
 public class Review {
 
     @Id
@@ -25,7 +27,6 @@ public class Review {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "toilet_id", nullable = false)
-    @NotNull(message = "Toilet is required")
     private Toilet toilet;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,19 +38,19 @@ public class Review {
     @Min(value = 0)
     @Max(value = 5)
     @NotNull(message = "Cleanliness rating is required")
-    private Byte cleanliness;
+    private Short cleanliness;
 
     @Min(value = 0)
     @Max(value = 5)
     @NotNull(message = "Equipment rating is required")
     @Column(name = "rating_equipment")
-    private Byte equipment;
+    private Short equipment;
 
     @Min(value = 0)
     @Max(value = 5)
     @NotNull(message = "Access rating is required")
     @Column(name = "rating_access")
-    private Byte access;
+    private Short access;
 
     @Column(name = "average_rating")
     private double averageRating;
@@ -61,10 +62,5 @@ public class Review {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime created;
-
-
-    public double getAverageRating(){
-        return (cleanliness + equipment + access) / 3.0;
-    }
 
 }

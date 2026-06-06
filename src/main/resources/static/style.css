@@ -1,0 +1,29 @@
+button{
+    color: black;
+    background-color: blanchedalmond;
+    border: solid 1px black;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+table{
+    border: solid 1px black;
+    border-radius: 2px;
+    margin-top: 10px;
+}
+tr, td, th{
+    padding: 15px;
+}
+
+tr:nth-child(even){
+    background-color: #eef8ff;
+}
+
+tr:hover {
+    background-color: #f6e7c2;
+    cursor: pointer;
+}
+
+header{
+    text-align: center;
+}

@@ -20,7 +20,7 @@ public class ToiletFeature {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id; // Din nye, enkle ID
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "toilet_id", nullable = false)
@@ -33,6 +33,6 @@ public class ToiletFeature {
     private OffsetDateTime verified;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "source")
+    @Column(name = "source", nullable = false)
     private SourceType source;
 }

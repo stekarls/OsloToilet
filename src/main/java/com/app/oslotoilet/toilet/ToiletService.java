@@ -36,7 +36,7 @@ public class ToiletService {
         return mapToResponseDto(toilet);
 
     }
-
+    @Transactional
     public ToiletResponseDto updateToilet(ToiletUpdateDto dto, UUID id){
         Toilet toilet = toiletRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
@@ -68,6 +68,9 @@ public class ToiletService {
 
 
     public void deleteToilet(UUID id){
+        if (!toiletRepository.existsById(id)){
+            throw new EntityNotFoundException("Toilet not found");
+        }
         toiletRepository.deleteById(id);
     }
 
@@ -94,6 +97,8 @@ public class ToiletService {
                 }
                 case "updateddesc" -> {
                     return toiletRepository.findAllByOrderByUpdatedAtDesc();
+                }default -> {
+                    return toiletRepository.findAll();
                 }
             }
         }

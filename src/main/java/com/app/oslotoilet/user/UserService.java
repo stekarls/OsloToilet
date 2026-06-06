@@ -40,6 +40,9 @@ public class UserService {
     }
 
     public void deleteUserById(UUID userId){
+        if (!userRepository.existsById(userId)){
+            throw new EntityNotFoundException("User not found");
+        }
         userRepository.deleteById(userId);
     }
 
