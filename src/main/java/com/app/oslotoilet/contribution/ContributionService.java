@@ -1,5 +1,6 @@
 package com.app.oslotoilet.contribution;
 
+import com.app.oslotoilet.enums.Contribution;
 import com.app.oslotoilet.enums.RequestStatus;
 import com.app.oslotoilet.toilet.ToiletRequestDto;
 import com.app.oslotoilet.toilet.ToiletService;
@@ -79,7 +80,7 @@ public class ContributionService {
 
         if (newStatus == RequestStatus.APPROVED){
             User user = request.getUser();
-            user.setContributionPoints(user.getContributionPoints() + 100);
+            user.setContributionPoints(user.getContributionPoints() + Contribution.APPROVED.getValue());
         }
 
         ToiletRequestDto newToilet = ToiletRequestDto.builder()

@@ -1,5 +1,6 @@
 package com.app.oslotoilet.review;
 
+import com.app.oslotoilet.enums.Contribution;
 import com.app.oslotoilet.toilet.Toilet;
 import com.app.oslotoilet.toilet.ToiletRepository;
 import com.app.oslotoilet.user.User;
@@ -51,6 +52,7 @@ public class ReviewService {
 
         Review review = mapToEntity(reviewRequestDto, user, toilet);
         review = reviewRepository.save(review);
+        user.setContributionPoints(user.getContributionPoints() + Contribution.REVIEW.getValue());
 
         return mapToResponseDto(review);
     }

@@ -20,7 +20,7 @@ public class User {
     @GeneratedValue (strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(unique = true, nullable = true)
+    @Column(unique = true)
     private String nickname;
 
     @Column(name = "contribution_points", nullable = false)
