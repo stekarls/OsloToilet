@@ -2,7 +2,7 @@ package com.app.oslotoilet.user;
 
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -47,7 +47,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDto updateUserById(UUID id, UserUpdateDto updateDto){
+    public UserResponseDto updateNicknameById(UUID id, UserUpdateDto updateDto){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id));
 

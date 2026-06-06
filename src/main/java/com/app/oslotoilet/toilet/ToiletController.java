@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/toilet")
+@RequestMapping("/api/v1/toilets")
 public class ToiletController {
 
     private final ToiletService toiletService;
@@ -41,7 +41,7 @@ public class ToiletController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<ToiletResponseDto> updateToilet(ToiletUpdateDto toiletUpdateDto, @PathVariable UUID id){
         return ResponseEntity.ok(toiletService.updateToilet(toiletUpdateDto, id));
     }

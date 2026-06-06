@@ -39,15 +39,15 @@ public class UserController {
         return new ResponseEntity<>(userService.createNewUser(user), HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id){
         userService.deleteUserById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<UserResponseDto> updateUserById(@PathVariable UUID id, @Valid @RequestBody UserUpdateDto userUpdateDto){
-        UserResponseDto response = userService.updateUserById(id, userUpdateDto);
+        UserResponseDto response = userService.updateNicknameById(id, userUpdateDto);
         return ResponseEntity.ok(response);
     }
 
