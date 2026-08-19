@@ -21,6 +21,7 @@ public class ToiletResponseDto {
     private boolean hasFee;
     private BigDecimal fee;
     private String description;
+    private boolean alwaysOpen;
     private boolean hasConditions;
     private String conditions;
     private boolean isSeasonal;

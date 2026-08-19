@@ -31,8 +31,10 @@ public class ToiletService {
     }
 
     @Transactional
-    public ToiletResponseDto createToilet(ToiletRequestDto toiletRequestDto){
-        Toilet toilet = toiletRepository.save(mapToEntity(toiletRequestDto));
+    public ToiletResponseDto createToilet(ToiletRequestDto dto){
+        validateToiletState(dto.isAlwaysOpen(), dto.isClosed());
+
+        Toilet toilet = toiletRepository.save(mapToEntity(dto));
         return mapToResponseDto(toilet);
 
     }
@@ -41,12 +43,18 @@ public class ToiletService {
         Toilet toilet = toiletRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
 
+        boolean resolvedAlwaysOpen = dto.getAlwaysOpen() != null ? dto.getAlwaysOpen() : toilet.isAlwaysOpen();
+        boolean resolvedClosed = dto.getClosed() != null ? dto.getClosed() : toilet.isClosed();
+
+        validateToiletState(resolvedAlwaysOpen, resolvedClosed);
+
         if (dto.getName() != null) toilet.setName(dto.getName());
         if (dto.getLatitude() != null) toilet.setLatitude(dto.getLatitude());
         if (dto.getLongitude() != null) toilet.setLongitude(dto.getLongitude());
         if (dto.getHasFee() != null) toilet.setHasFee(dto.getHasFee());
         if (dto.getFee() != null) toilet.setFee(dto.getFee());
         if (dto.getClosed() != null) toilet.setClosed(dto.getClosed());
+        if (dto.getAlwaysOpen() != null) toilet.setAlwaysOpen(dto.getAlwaysOpen());
 
         if (dto.getDescription() != null) {
             if (dto.getDescription().isEmpty()) {
@@ -104,6 +112,12 @@ public class ToiletService {
         }
         return toiletRepository.findAll();
     }
+
+    private void validateToiletState(boolean alwaysOpen, boolean closed) {
+        if (alwaysOpen && closed) {
+            throw new IllegalStateException("A toilet cannot be both always open and closed");
+        }
+    }
     private Toilet mapToEntity(ToiletRequestDto toiletRequestDto){
         BigDecimal fee = toiletRequestDto.isHasFee() ? toiletRequestDto.getFee() : BigDecimal.valueOf(0);
         return Toilet.builder()
@@ -113,6 +127,7 @@ public class ToiletService {
                 .hasFee(toiletRequestDto.isHasFee())
                 .fee(fee)
                 .description(toiletRequestDto.getDescription())
+                .alwaysOpen(toiletRequestDto.isAlwaysOpen())
                 .hasConditions(toiletRequestDto.isHasConditions())
                 .conditions(toiletRequestDto.getConditions())
                 .isSeasonal(toiletRequestDto.isSeasonal())
@@ -130,6 +145,7 @@ public class ToiletService {
                 .hasFee(toilet.isHasFee())
                 .fee(toilet.getFee())
                 .description(toilet.getDescription())
+                .alwaysOpen(toilet.isAlwaysOpen())
                 .hasConditions(toilet.isHasConditions())
                 .conditions(toilet.getConditions())
                 .isSeasonal(toilet.isSeasonal())
@@ -138,4 +154,5 @@ public class ToiletService {
                 .updatedAt(toilet.getUpdatedAt())
                 .build();
     }
+
 }

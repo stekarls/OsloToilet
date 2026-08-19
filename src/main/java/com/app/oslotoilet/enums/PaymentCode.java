@@ -1,9 +1,8 @@
 package com.app.oslotoilet.enums;
 
 public enum PaymentCode {
-    FREE,
     VIPPS,
-    CREDIT_CARD,
+    CARD,
     CASH,
-    SMS
+    CONTACTLESS
 }

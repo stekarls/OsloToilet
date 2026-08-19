@@ -5,13 +5,12 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ToiletRequestDto {
 
     @NotBlank
@@ -36,6 +35,8 @@ public class ToiletRequestDto {
     @NotBlank
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
+
+    private boolean alwaysOpen;
 
     private boolean hasConditions;
 

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/toilets")
+@RequestMapping("/api/v1/toilet-features")
 public class ToiletFeatureController {
     private final ToiletFeatureService toiletFeatureService;
 

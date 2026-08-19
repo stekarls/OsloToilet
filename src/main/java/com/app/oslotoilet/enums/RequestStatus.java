@@ -5,5 +5,7 @@ public enum RequestStatus {
     UNDER_REVIEW,
     APPROVED,
     REJECTED,
-    DUPLICATE
+    DUPLICATE,
+    FIXED,
+    UNSOLVABLE,
 }
