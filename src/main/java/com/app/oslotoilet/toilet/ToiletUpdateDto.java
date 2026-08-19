@@ -23,6 +23,7 @@ public class ToiletUpdateDto {
     private BigDecimal longitude;
     private Boolean hasFee;
     private BigDecimal fee;
+    private Boolean alwaysOpen;
     private Boolean isSeasonal;
     private Boolean closed;
 

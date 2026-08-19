@@ -63,6 +63,9 @@ public class Toilet {
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String conditions;
 
+    @Column(name = "always_open", nullable = false)
+    private boolean alwaysOpen;
+
     @Column(name = "is_seasonal")
     private boolean isSeasonal;
 

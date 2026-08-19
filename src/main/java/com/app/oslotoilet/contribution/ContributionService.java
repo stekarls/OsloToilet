@@ -7,7 +7,7 @@ import com.app.oslotoilet.toilet.ToiletService;
 import com.app.oslotoilet.user.User;
 import com.app.oslotoilet.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -66,7 +66,8 @@ public class ContributionService {
     @Transactional
     public LocationRequestResponseDto changeRequestStatus(UUID id, RequestStatus newStatus, String adminComment){
 
-        LocationRequest request = contributionRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Location Request not found with ID: " + id));
+        LocationRequest request = contributionRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException("Location Request not found with ID: " + id));
 
         if (request.getRequestStatus() == RequestStatus.APPROVED){
             throw new IllegalStateException("Cannot modify a location request that has already been approved.");
@@ -104,7 +105,8 @@ public class ContributionService {
 
     private LocationRequest mapToEntity(LocationRequestDto locationRequestDto, User user){
         BigDecimal fee = locationRequestDto.isHasFee() ? locationRequestDto.getFee() : BigDecimal.valueOf(0);
-        return LocationRequest.builder().user(user)
+        return LocationRequest.builder()
+                .user(user)
                 .name(locationRequestDto.getName())
                 .latitude(locationRequestDto.getLatitude())
                 .longitude(locationRequestDto.getLongitude())

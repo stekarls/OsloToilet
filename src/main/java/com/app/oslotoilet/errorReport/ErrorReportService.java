@@ -7,7 +7,7 @@ import com.app.oslotoilet.toilet.ToiletRepository;
 import com.app.oslotoilet.user.User;
 import com.app.oslotoilet.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;

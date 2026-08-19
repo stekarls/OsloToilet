@@ -8,11 +8,10 @@ ON CONFLICT (code) DO NOTHING;
 
 INSERT INTO payment_options(id, payment_option)
 VALUES
-    (gen_random_uuid(), 'FREE'),
     (gen_random_uuid(), 'VIPPS'),
-    (gen_random_uuid(), 'CREDIT_CARD'),
+    (gen_random_uuid(), 'CARD'),
     (gen_random_uuid(), 'CASH'),
-    (gen_random_uuid(), 'SMS')
+    (gen_random_uuid(), 'CONTACTLESS')
 ON CONFLICT (payment_option) DO NOTHING;
 
 

@@ -2,10 +2,7 @@ package com.app.oslotoilet.paymentOption;
 
 import com.app.oslotoilet.enums.PaymentCode;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 
@@ -14,9 +11,10 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "payment_options")
-public class PaymentOption {
+public class PaymentOption{
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
