@@ -36,6 +36,16 @@ public class ToiletFeatureService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<ToiletFeatureResponseDto> getFeaturesForToilet(UUID toiletId) {
+        Toilet toilet = toiletRepository.findById(toiletId).orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
+
+        return toiletFeatureRepository.findByToilet(toilet)
+                .stream()
+                .map(this::mapToResponseDto)
+                .toList();
+    }
+
     public ToiletFeatureResponseDto addFeatureToToilet(UUID toiletId, ToiletFeatureRequestDto dto) {
         Toilet toilet = toiletRepository.findById(toiletId)
                 .orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
@@ -68,10 +78,13 @@ public class ToiletFeatureService {
         }
 
         List<ToiletFeature> existingFeatures = toiletFeatureRepository.findByToilet(toilet);
+
+        //Extract all existing feature IDs for the toilet
         Set<UUID> existingFeatureIds = existingFeatures.stream()
                 .map(tf -> tf.getFeature().getId())
                 .collect(Collectors.toSet());
 
+        // Filter out features that are already associated with the toilet
         List<ToiletFeature> toSave = features.stream()
                 .filter(f -> !existingFeatureIds.contains(f.getId()))
                 .map(f -> ToiletFeature.builder()
@@ -91,19 +104,8 @@ public class ToiletFeatureService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
-    public List<ToiletFeatureResponseDto> getFeaturesForToilet(UUID toiletId) {
-        Toilet toilet = toiletRepository.findById(toiletId)
-                .orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
-
-        return toiletFeatureRepository.findByToilet(toilet)
-                .stream()
-                .map(this::mapToResponseDto)
-                .toList();
-    }
-
-    public ToiletFeatureResponseDto verifyFeature(UUID toiletId, UUID featureId) {
-        ToiletFeature link = toiletFeatureRepository.findById(featureId)
+    public ToiletFeatureResponseDto verifyFeature(UUID toiletId, UUID toiletFeatureId) {
+        ToiletFeature link = toiletFeatureRepository.findById(toiletFeatureId)
                 .orElseThrow(() -> new EntityNotFoundException("Feature link not found"));
 
         if (!link.getToilet().getId().equals(toiletId)) {
