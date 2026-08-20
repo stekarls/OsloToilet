@@ -12,7 +12,7 @@ import java.time.OffsetDateTime;
 public class GlobalExceptionHandler{
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ErrorResponse> resourceNotFoundException(ResourceNotFoundException ex){
+    public ResponseEntity<ErrorResponse> entityNotFoundException(EntityNotFoundException ex){
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setStatus(HttpStatus.NOT_FOUND.value());
         errorResponse.setMessage(ex.getMessage());
