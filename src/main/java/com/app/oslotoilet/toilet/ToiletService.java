@@ -39,14 +39,11 @@ public class ToiletService {
 
     }
     @Transactional
-    public ToiletResponseDto updateToilet(ToiletUpdateDto dto, UUID id){
-        Toilet toilet = toiletRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
+    public ToiletResponseDto updateToilet(ToiletUpdateDto dto, UUID toiletId){
+        Toilet toilet = toiletRepository.findById(toiletId)
+                .orElseThrow(() -> new EntityNotFoundException("Toilet not found with ID: " + toiletId));
 
-        boolean resolvedAlwaysOpen = dto.getAlwaysOpen() != null ? dto.getAlwaysOpen() : toilet.isAlwaysOpen();
-        boolean resolvedClosed = dto.getClosed() != null ? dto.getClosed() : toilet.isClosed();
 
-        validateToiletState(resolvedAlwaysOpen, resolvedClosed);
 
         if (dto.getName() != null) toilet.setName(dto.getName());
         if (dto.getLatitude() != null) toilet.setLatitude(dto.getLatitude());
@@ -55,6 +52,8 @@ public class ToiletService {
         if (dto.getFee() != null) toilet.setFee(dto.getFee());
         if (dto.getClosed() != null) toilet.setClosed(dto.getClosed());
         if (dto.getAlwaysOpen() != null) toilet.setAlwaysOpen(dto.getAlwaysOpen());
+
+        validateToiletState(toilet.isAlwaysOpen(), toilet.isClosed());
 
         if (dto.getDescription() != null) {
             if (dto.getDescription().isEmpty()) {
@@ -75,11 +74,11 @@ public class ToiletService {
     }
 
 
-    public void deleteToilet(UUID id){
-        if (!toiletRepository.existsById(id)){
-            throw new EntityNotFoundException("Toilet not found");
+    public void deleteToilet(UUID toiletId){
+        if (!toiletRepository.existsById(toiletId)){
+            throw new EntityNotFoundException("Toilet not found with ID: " + toiletId);
         }
-        toiletRepository.deleteById(id);
+        toiletRepository.deleteById(toiletId);
     }
 
 

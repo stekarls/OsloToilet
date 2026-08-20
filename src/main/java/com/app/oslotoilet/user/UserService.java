@@ -41,17 +41,17 @@ public class UserService {
 
     public void deleteUserById(UUID userId){
         if (!userRepository.existsById(userId)){
-            throw new EntityNotFoundException("User not found");
+            throw new EntityNotFoundException("User not found with ID: " + userId);
         }
         userRepository.deleteById(userId);
     }
 
     @Transactional
-    public UserResponseDto updateNicknameById(UUID id, UserUpdateDto updateDto){
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id));
+    public UserResponseDto updateNicknameById(UUID userId, UserUpdateDto updateDto){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
 
-        if (userRepository.existsByNicknameAndIdNot(updateDto.getNickname(), id)) {
+        if (userRepository.existsByNicknameAndIdNot(updateDto.getNickname(), userId)) {
             throw new IllegalArgumentException("The nickname '" + updateDto.getNickname() + "' is already taken");
         }
         user.setNickname(updateDto.getNickname());

@@ -28,10 +28,10 @@ public class OpeningHoursService {
 
     public OpeningHoursResponseDto addOpeningHours(UUID toiletId, OpeningHoursRequestDto dto) {
         Toilet toilet = toiletRepository.findById(toiletId)
-                .orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Toilet not found with id: " + toiletId));
 
         if (openingHoursRepository.existsByToiletAndDayOfWeek(toilet, dto.getDayOfWeek())) {
-            throw new IllegalStateException("Opening hours already exist for this day");
+            throw new IllegalStateException("Opening hours already exist for this toilet on " + dto.getDayOfWeek());
         }
 
         OpeningHours openingHours = OpeningHours.builder()
@@ -46,7 +46,7 @@ public class OpeningHoursService {
 
     public List<OpeningHoursResponseDto> addBulkOpeningHours(UUID toiletId, OpeningHoursBulkRequestDto dto){
         Toilet toilet = toiletRepository.findById(toiletId)
-                .orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Toilet not found with id: " + toiletId));
 
         List<DayOfWeek> incomingDays = dto.getOpeningHours().stream()
                 .map(OpeningHoursRequestDto::getDayOfWeek)
@@ -88,7 +88,7 @@ public class OpeningHoursService {
     @Transactional(readOnly = true)
     public List<OpeningHoursResponseDto> getOpeningHoursForToilet(UUID toiletId) {
         Toilet toilet = toiletRepository.findById(toiletId)
-                .orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Toilet not found with id: " + toiletId));
 
         return openingHoursRepository.findByToiletOrderByDayOfWeekAsc(toilet)
                 .stream()
@@ -98,7 +98,7 @@ public class OpeningHoursService {
 
     public OpeningHoursResponseDto updateOpeningHours(UUID toiletId, UUID openingHoursId, OpeningHoursUpdateDto dto) {
         OpeningHours openingHours = openingHoursRepository.findById(openingHoursId)
-                .orElseThrow(() -> new EntityNotFoundException("Opening hours not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Opening hours not found with id: " + openingHoursId));
 
         if (!openingHours.getToilet().getId().equals(toiletId)) {
             throw new AccessDeniedException("Opening hours do not belong to this toilet");
@@ -112,7 +112,7 @@ public class OpeningHoursService {
 
     public void deleteOpeningHours(UUID toiletId, UUID openingHoursId) {
         OpeningHours openingHours = openingHoursRepository.findById(openingHoursId)
-                .orElseThrow(() -> new EntityNotFoundException("Opening hours not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Opening hours not found with id: " + openingHoursId));
 
         if (!openingHours.getToilet().getId().equals(toiletId)) {
             throw new AccessDeniedException("Opening hours do not belong to this toilet");

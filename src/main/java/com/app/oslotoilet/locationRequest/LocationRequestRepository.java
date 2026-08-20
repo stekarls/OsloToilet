@@ -1,4 +1,4 @@
-package com.app.oslotoilet.contribution;
+package com.app.oslotoilet.locationRequest;
 
 import com.app.oslotoilet.enums.RequestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface ContributionRepository extends JpaRepository<LocationRequest, UUID> {
+public interface LocationRequestRepository extends JpaRepository<LocationRequest, UUID> {
 
     //TODO: check other queries for n+1 problem
     //Solving n+1

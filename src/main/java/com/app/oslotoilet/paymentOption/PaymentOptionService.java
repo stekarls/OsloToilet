@@ -26,10 +26,10 @@ public class PaymentOptionService {
     }
 
     @Transactional(readOnly = true)
-    public PaymentOptionResponseDto getPaymentOptionById(UUID id){
-        return paymentOptionRepository.findById(id)
+    public PaymentOptionResponseDto getPaymentOptionById(UUID paymentOptionId){
+        return paymentOptionRepository.findById(paymentOptionId)
                 .map(this::mapToResponseDto)
-                .orElseThrow(() -> new EntityNotFoundException("Payment option not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Payment option not found with paymentOptionId: " + paymentOptionId));
     }
 
     public PaymentOptionResponseDto createPaymentOption(PaymentOptionRequestDto dto){
@@ -44,11 +44,11 @@ public class PaymentOptionService {
         return mapToResponseDto(paymentOptionRepository.save(paymentOption));
     }
 
-    public void deletePaymentOption(UUID id){
-        if (!paymentOptionRepository.existsById(id)){
-            throw new EntityNotFoundException("Payment option not found");
+    public void deletePaymentOption(UUID paymentOptionId){
+        if (!paymentOptionRepository.existsById(paymentOptionId)){
+            throw new EntityNotFoundException("Payment option not found with paymentOptionId: " + paymentOptionId);
         }
-        paymentOptionRepository.deleteById(id);
+        paymentOptionRepository.deleteById(paymentOptionId);
     }
 
     private PaymentOptionResponseDto mapToResponseDto(PaymentOption paymentOption){

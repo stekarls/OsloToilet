@@ -1,6 +1,6 @@
 package com.app.oslotoilet.review;
 
-import com.app.oslotoilet.enums.Contribution;
+import com.app.oslotoilet.enums.ContributionPoints;
 import com.app.oslotoilet.toilet.Toilet;
 import com.app.oslotoilet.toilet.ToiletRepository;
 import com.app.oslotoilet.user.User;
@@ -46,22 +46,22 @@ public class ReviewService {
     @Transactional
     public ReviewResponseDto createReview(ReviewRequestDto reviewRequestDto){
 
-        Toilet toilet = toiletRepository.findById(reviewRequestDto.getToiletId()).orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
-        User user = userRepository.findById(reviewRequestDto.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        Toilet toilet = toiletRepository.findById(reviewRequestDto.getToiletId()).orElseThrow(() -> new EntityNotFoundException("Toilet not found with id: " + reviewRequestDto.getToiletId()));
+        User user = userRepository.findById(reviewRequestDto.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + reviewRequestDto.getUserId()));
 
 
         Review review = mapToEntity(reviewRequestDto, user, toilet);
         review = reviewRepository.save(review);
-        user.setContributionPoints(user.getContributionPoints() + Contribution.REVIEW.getValue());
+        user.setContributionPoints(user.getContributionPoints() + ContributionPoints.REVIEW.getValue());
 
         return mapToResponseDto(review);
     }
 
-    public void deleteReview(UUID id){
-        if (!reviewRepository.existsById(id)){
-            throw new EntityNotFoundException("Review not found");
+    public void deleteReview(UUID reviewId){
+        if (!reviewRepository.existsById(reviewId)){
+            throw new EntityNotFoundException("Review not found with reviewId: " + reviewId);
         }
-        reviewRepository.deleteById(id);
+        reviewRepository.deleteById(reviewId);
     }
 
 

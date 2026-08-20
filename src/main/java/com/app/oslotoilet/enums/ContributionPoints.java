@@ -1,12 +1,12 @@
 package com.app.oslotoilet.enums;
 
-public enum Contribution {
+public enum ContributionPoints {
     APPROVED(100),
     REVIEW(20);
 
     private final int value;
 
-    Contribution(int value) {
+    ContributionPoints(int value) {
         this.value = value;
     }
 
