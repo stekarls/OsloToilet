@@ -1,6 +1,7 @@
 package com.app.oslotoilet.user;
 
 
+import com.app.oslotoilet.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,8 +21,19 @@ public class User {
     @GeneratedValue (strategy = GenerationType.UUID)
     private UUID id;
 
+
     @Column(unique = true)
     private String nickname;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Role role;
 
     @Column(name = "contribution_points", nullable = false)
     private Long contributionPoints = 0L;
