@@ -30,8 +30,8 @@ public class ToiletFeatureController {
     }
 
     @PatchMapping("/{toiletId}/features/{featureId}/verify")
-    public ToiletFeatureResponseDto verifyToiletFeature(@PathVariable UUID featureId, @PathVariable UUID toiletId) {
-        return toiletFeatureService.verifyFeature(toiletId, featureId);
+    public ResponseEntity<ToiletFeatureResponseDto> verifyToiletFeature(@PathVariable UUID featureId, @PathVariable UUID toiletId) {
+        return ResponseEntity.ok(toiletFeatureService.verifyFeature(toiletId, featureId));
     }
 
     @PostMapping("/{toiletId}/features")
