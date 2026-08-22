@@ -4,6 +4,7 @@ package com.app.oslotoilet.user;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,6 +50,13 @@ public class UserController {
     public ResponseEntity<UserResponseDto> updateUserById(@PathVariable UUID id, @Valid @RequestBody UserUpdateDto userUpdateDto){
         UserResponseDto response = userService.updateNicknameById(id, userUpdateDto);
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{userId}/ban")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> banUser(@PathVariable UUID userId) {
+        userService.banUser(userId);
+        return ResponseEntity.noContent().build();
     }
 
 

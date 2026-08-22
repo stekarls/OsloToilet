@@ -18,4 +18,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByNickname(String nickname);
 
     Optional<User> findByEmail(String email);
+
+    Optional<User> findByNickname(String nickname);
 }
