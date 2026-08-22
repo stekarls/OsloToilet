@@ -58,6 +58,11 @@ public class UserService {
         return mapToResponseDto(user);
     }
 
+    public void banUser(UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        user.setBanned(true);
+    }
+
     private User mapToEntity(UserRequestDto requestDto){
         return User.builder()
                 .nickname(requestDto.getNickname())

@@ -43,6 +43,7 @@ public class AuthService {
                 .role(Role.USER)
                 .contributionPoints(0L)
                 .createdAt(OffsetDateTime.now())
+                .banned(false)
                 .build();
 
         userRepository.save(user);

@@ -41,4 +41,7 @@ public class User {
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
+    @Column(name = "banned", nullable = false)
+    private Boolean banned;
+
 }
