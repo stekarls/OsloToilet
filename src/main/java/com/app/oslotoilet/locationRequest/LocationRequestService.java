@@ -1,6 +1,6 @@
-package com.app.oslotoilet.contribution;
+package com.app.oslotoilet.locationRequest;
 
-import com.app.oslotoilet.enums.Contribution;
+import com.app.oslotoilet.enums.ContributionPoints;
 import com.app.oslotoilet.enums.RequestStatus;
 import com.app.oslotoilet.toilet.ToiletRequestDto;
 import com.app.oslotoilet.toilet.ToiletService;
@@ -16,14 +16,14 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class ContributionService {
+public class LocationRequestService {
 
-    private final ContributionRepository contributionRepository;
+    private final LocationRequestRepository locationRequestRepository;
     private final UserRepository userRepository;
     private final ToiletService toiletService;
 
-    public ContributionService(ContributionRepository contributionRepository, UserRepository userRepository, ToiletService toiletService){
-        this.contributionRepository = contributionRepository;
+    public LocationRequestService(LocationRequestRepository locationRequestRepository, UserRepository userRepository, ToiletService toiletService){
+        this.locationRequestRepository = locationRequestRepository;
         this.userRepository = userRepository;
         this.toiletService = toiletService;
     }
@@ -33,14 +33,14 @@ public class ContributionService {
         User user = userRepository.findById(locationRequest.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + locationRequest.getUserId()));
 
         LocationRequest request = mapToEntity(locationRequest, user);
-        request = contributionRepository .save(request);
+        request = locationRequestRepository.save(request);
 
         return mapToResponseDto(request);
     }
 
     public boolean deleteLocationRequestById(UUID id){
-        if (contributionRepository.existsById(id)){
-            contributionRepository.deleteById(id);
+        if (locationRequestRepository.existsById(id)){
+            locationRequestRepository.deleteById(id);
             return true;
         }
 
@@ -48,29 +48,29 @@ public class ContributionService {
     }
 
     public List<LocationRequestResponseDto> getAllRequests(){
-        return contributionRepository.findAllWithUser().stream().map(this::mapToResponseDto).toList();
+        return locationRequestRepository.findAllWithUser().stream().map(this::mapToResponseDto).toList();
     }
 
     public List<LocationRequestResponseDto> findByRequestStatus(RequestStatus requestStatus){
-        return contributionRepository.findByRequestStatus(requestStatus).stream().map(this::mapToResponseDto).toList();
+        return locationRequestRepository.findByRequestStatus(requestStatus).stream().map(this::mapToResponseDto).toList();
     }
 
     public List<LocationRequestResponseDto> findByuserIdAndRequestStatus(UUID userId, RequestStatus requestStatus){
-        return contributionRepository.findByuserIdAndRequestStatus(userId, requestStatus).stream().map(this::mapToResponseDto).toList();
+        return locationRequestRepository.findByuserIdAndRequestStatus(userId, requestStatus).stream().map(this::mapToResponseDto).toList();
     }
 
     public List<LocationRequestResponseDto> findByUserIdOrderByCreatedAtDesc(UUID userId){
-        return contributionRepository.findByUserIdOrderByCreatedAtDesc(userId).stream().map(this::mapToResponseDto).toList();
+        return locationRequestRepository.findByUserIdOrderByCreatedAtDesc(userId).stream().map(this::mapToResponseDto).toList();
     }
 
     @Transactional
-    public LocationRequestResponseDto changeRequestStatus(UUID id, RequestStatus newStatus, String adminComment){
+    public LocationRequestResponseDto changeRequestStatus(UUID locationRequestId, RequestStatus newStatus, String adminComment){
 
-        LocationRequest request = contributionRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException("Location Request not found with ID: " + id));
+        LocationRequest request = locationRequestRepository.findById(locationRequestId).orElseThrow(() ->
+                new EntityNotFoundException("Location Request not found with ID: " + locationRequestId));
 
         if (request.getRequestStatus() == RequestStatus.APPROVED){
-            throw new IllegalStateException("Cannot modify a location request that has already been approved.");
+            throw new IllegalStateException("Cannot modify a location request that has already been approved");
         }
 
         if(adminComment != null){
@@ -81,7 +81,7 @@ public class ContributionService {
 
         if (newStatus == RequestStatus.APPROVED){
             User user = request.getUser();
-            user.setContributionPoints(user.getContributionPoints() + Contribution.APPROVED.getValue());
+            user.setContributionPoints(user.getContributionPoints() + ContributionPoints.APPROVED.getValue());
         }
 
         ToiletRequestDto newToilet = ToiletRequestDto.builder()

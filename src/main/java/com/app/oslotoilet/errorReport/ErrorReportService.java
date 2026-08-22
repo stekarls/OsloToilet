@@ -56,8 +56,8 @@ public class ErrorReportService {
     }
 
     @Transactional
-    public ErrorReportDto changeStatus(UUID id, RequestStatus status, String adminComment){
-        ErrorReport errorReport = errorReportRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Error report not found with ID: " + id));
+    public ErrorReportDto changeStatus(UUID reportId, RequestStatus status, String adminComment){
+        ErrorReport errorReport = errorReportRepository.findById(reportId).orElseThrow(() -> new EntityNotFoundException("Error report not found with ID: " + reportId));
 
         if (adminComment != null){
             errorReport.setAdminComment(adminComment);

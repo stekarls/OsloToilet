@@ -1,4 +1,4 @@
-package com.app.oslotoilet.contribution;
+package com.app.oslotoilet.locationRequest;
 
 import com.app.oslotoilet.enums.RequestStatus;
 import lombok.*;

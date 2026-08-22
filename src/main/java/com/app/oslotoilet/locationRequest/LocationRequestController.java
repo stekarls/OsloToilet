@@ -1,4 +1,4 @@
-package com.app.oslotoilet.contribution;
+package com.app.oslotoilet.locationRequest;
 
 
 import com.app.oslotoilet.enums.RequestStatus;
@@ -12,32 +12,32 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/contribution")
-public class ContributionController {
+public class LocationRequestController {
 
-    private final ContributionService contributionService;
+    private final LocationRequestService locationRequestService;
 
-    public ContributionController(ContributionService contributionService){
-        this.contributionService = contributionService;
+    public LocationRequestController(LocationRequestService locationRequestService){
+        this.locationRequestService = locationRequestService;
     }
 
 
     @GetMapping
     public List<LocationRequestResponseDto> getRequests(@RequestParam(required = false) RequestStatus status){
         if (status != null){
-            return contributionService.findByRequestStatus(status);
+            return locationRequestService.findByRequestStatus(status);
         }
-        return contributionService.getAllRequests();
+        return locationRequestService.getAllRequests();
     }
 
     @PostMapping("/create")
     public ResponseEntity<LocationRequestResponseDto> createNewLocationRequest(@Valid @RequestBody LocationRequestDto locationRequest){
-        LocationRequestResponseDto response = contributionService.createNewLocationRequest(locationRequest);
+        LocationRequestResponseDto response = locationRequestService.createNewLocationRequest(locationRequest);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLocationRequestbyId(@PathVariable UUID id){
-        if (contributionService.deleteLocationRequestById(id)){
+        if (locationRequestService.deleteLocationRequestById(id)){
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
@@ -46,14 +46,14 @@ public class ContributionController {
     @GetMapping("/{userId}")
     public List<LocationRequestResponseDto> getRequestsByUser(@PathVariable UUID userId, @RequestParam(required = false) RequestStatus requestStatus){
         if (requestStatus != null){
-            return contributionService.findByuserIdAndRequestStatus(userId, requestStatus);
+            return locationRequestService.findByuserIdAndRequestStatus(userId, requestStatus);
         }
-        return contributionService.findByUserIdOrderByCreatedAtDesc(userId);
+        return locationRequestService.findByUserIdOrderByCreatedAtDesc(userId);
     }
 
     @PutMapping("{id}")
     public ResponseEntity<LocationRequestResponseDto> changeRequestStatus(@PathVariable UUID id, @RequestParam RequestStatus requestStatus, @RequestParam(required = false) String adminComment){
-        LocationRequestResponseDto request = contributionService.changeRequestStatus(id, requestStatus, adminComment);
+        LocationRequestResponseDto request = locationRequestService.changeRequestStatus(id, requestStatus, adminComment);
         return ResponseEntity.ok(request);
     }
 

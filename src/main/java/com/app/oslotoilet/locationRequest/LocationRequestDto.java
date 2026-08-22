@@ -1,4 +1,4 @@
-package com.app.oslotoilet.contribution;
+package com.app.oslotoilet.locationRequest;
 
 import jakarta.validation.constraints.*;
 import lombok.*;

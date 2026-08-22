@@ -38,7 +38,7 @@ public class ToiletFeatureService {
 
     @Transactional(readOnly = true)
     public List<ToiletFeatureResponseDto> getFeaturesForToilet(UUID toiletId) {
-        Toilet toilet = toiletRepository.findById(toiletId).orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
+        Toilet toilet = toiletRepository.findById(toiletId).orElseThrow(() -> new EntityNotFoundException("Toilet not found with id: " + toiletId));
 
         return toiletFeatureRepository.findByToilet(toilet)
                 .stream()
@@ -48,12 +48,12 @@ public class ToiletFeatureService {
 
     public ToiletFeatureResponseDto addFeatureToToilet(UUID toiletId, ToiletFeatureRequestDto dto) {
         Toilet toilet = toiletRepository.findById(toiletId)
-                .orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Toilet not found with id: " + toiletId));
         Feature feature = featureRepository.findById(dto.getFeatureId())
-                .orElseThrow(() -> new EntityNotFoundException("Feature not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Feature not found with id: " + dto.getFeatureId()));
 
         if (toiletFeatureRepository.existsByToiletAndFeature(toilet, feature)) {
-            throw new IllegalStateException("Toilet already has this feature");
+            throw new IllegalStateException("Toilet already has feature: " + feature.getCode());
         }
 
         ToiletFeature toiletFeature = ToiletFeature.builder()
@@ -67,12 +67,13 @@ public class ToiletFeatureService {
 
     public List<ToiletFeatureResponseDto> addFeaturesToToilet(UUID toiletId, ToiletFeatureBulkRequestDto dto) {
         Toilet toilet = toiletRepository.findById(toiletId)
-                .orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Toilet not found with id: " + toiletId));
 
         List<UUID> featureIds = dto.getFeatureIds();
 
         List<Feature> features = featureRepository.findAllById(featureIds);
 
+        //TODO: Tell client which features were not found
         if (features.size() != featureIds.size()){
             throw new EntityNotFoundException("One or more features not found");
         }
@@ -106,10 +107,10 @@ public class ToiletFeatureService {
 
     public ToiletFeatureResponseDto verifyFeature(UUID toiletId, UUID toiletFeatureId) {
         ToiletFeature link = toiletFeatureRepository.findById(toiletFeatureId)
-                .orElseThrow(() -> new EntityNotFoundException("Feature link not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Toilet-feature link not found with id: " + toiletFeatureId));
 
         if (!link.getToilet().getId().equals(toiletId)) {
-            throw new AccessDeniedException("Feature does not belong to this toilet");
+            throw new AccessDeniedException("Toilet-featrue link does not belong to toilet with id: " + toiletId);
         }
 
         link.setVerified(OffsetDateTime.now());
@@ -118,10 +119,10 @@ public class ToiletFeatureService {
 
     public void removeFeatureFromToilet(UUID toiletId, UUID featureId) {
         ToiletFeature link = toiletFeatureRepository.findById(featureId)
-                .orElseThrow(() -> new EntityNotFoundException("Feature link not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Feature link not found with id: " + featureId));
 
         if (!link.getToilet().getId().equals(toiletId)) {
-            throw new AccessDeniedException("Feature does not belong to this toilet");
+            throw new AccessDeniedException("Toilet-feature link does not belong to this toilet");
         }
 
         toiletFeatureRepository.delete(link);

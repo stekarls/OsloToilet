@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+
 @Service
 @Transactional
 public class ToiletPaymentOptionService {
@@ -34,17 +35,17 @@ public class ToiletPaymentOptionService {
     }
     @Transactional(readOnly = true)
     public List<ToiletPaymentOptionResponseDto> getPaymentOptionsForToilet(UUID toiletId){
-        Toilet toilet = toiletRepository.findById(toiletId).orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
+        Toilet toilet = toiletRepository.findById(toiletId).orElseThrow(() -> new EntityNotFoundException("Toilet not found with id " + toiletId));
         return toiletPaymentOptionRepository.findByToilet(toilet).stream().map(this::mapToResponseDto).toList();
     }
 
     public ToiletPaymentOptionResponseDto addPaymentOption(UUID toiletId, ToiletPaymentOptionRequestDto dto){
-        Toilet toilet = toiletRepository.findById(toiletId).orElseThrow(() -> new EntityNotFoundException("Toilet not found"));
+        Toilet toilet = toiletRepository.findById(toiletId).orElseThrow(() -> new EntityNotFoundException("Toilet not found with id " + toiletId));
         UUID paymentOptionId = dto.getPaymentOptionId();
-        PaymentOption paymentOption = paymentOptionRepository.findById(paymentOptionId).orElseThrow(() -> new EntityNotFoundException("Payment option not found"));
+        PaymentOption paymentOption = paymentOptionRepository.findById(paymentOptionId).orElseThrow(() -> new EntityNotFoundException("Payment option not found with id: " + paymentOptionId));
 
         if (toiletPaymentOptionRepository.existsByToiletAndPaymentOption(toilet, paymentOption)) {
-            throw new IllegalStateException("Payment option already exists for this toilet");
+            throw new IllegalStateException("Payment option " + paymentOption.getCode() + " already exists for this toilet");
         }
 
         ToiletPaymentOption toiletPaymentOption = ToiletPaymentOption.builder()
@@ -57,14 +58,15 @@ public class ToiletPaymentOptionService {
     }
 
     public List<ToiletPaymentOptionResponseDto> addPaymentOptions(UUID toiletId, ToiletPaymentOptionBulkRequestDto dto){
-        Toilet toilet = toiletRepository.findById(toiletId).orElseThrow(() -> new EntityNotFoundException("Toilet does not exist"));
+        Toilet toilet = toiletRepository.findById(toiletId).orElseThrow(() -> new EntityNotFoundException("Toilet not found with id " + toiletId));
 
         List<UUID> paymentOptionIds = dto.getPaymentOptionIds();
 
         List<PaymentOption> paymentOptions = paymentOptionRepository.findAllById(paymentOptionIds);
 
+        //TODO: give response which payment option does not exist
         if (paymentOptions.size() != paymentOptionIds.size()) {
-            throw new EntityNotFoundException("One or more payment options do not exist");
+            throw new EntityNotFoundException("One or more provided payment options do not exist");
         }
 
         List<ToiletPaymentOption> existingPaymentOptions = toiletPaymentOptionRepository.findByToilet(toilet);
@@ -84,14 +86,14 @@ public class ToiletPaymentOptionService {
                 .toList();
 
         if (toSave.isEmpty()) {
-            throw new IllegalStateException("Toilet already has all the specified payment options");
+            throw new IllegalStateException("Toilet with id " + toiletId + "already has all the specified payment options");
         }
 
         return toiletPaymentOptionRepository.saveAll(toSave).stream().map(this::mapToResponseDto).toList();
     }
 
     public ToiletPaymentOptionResponseDto verifyPaymentOption(UUID toiletId, UUID toiletPaymentOptionId){
-        ToiletPaymentOption link = toiletPaymentOptionRepository.findById(toiletPaymentOptionId).orElseThrow(() -> new EntityNotFoundException("Payment option entry not found"));
+        ToiletPaymentOption link = toiletPaymentOptionRepository.findById(toiletPaymentOptionId).orElseThrow(() -> new EntityNotFoundException("Toilet-payment link not found with id " + toiletPaymentOptionId));
 
         if (!link.getToilet().getId().equals(toiletId)){
             throw new AccessDeniedException("Payment option does not belong to the specified toilet");
@@ -100,11 +102,11 @@ public class ToiletPaymentOptionService {
         return mapToResponseDto(link);
     }
 
-    public void removePaymentOptionFromToilet(UUID toiletId, UUID toiletPaymentOptionid){
-        ToiletPaymentOption link = toiletPaymentOptionRepository.findById(toiletPaymentOptionid).orElseThrow(() -> new EntityNotFoundException("Payment option entry not found"));
+    public void removePaymentOptionFromToilet(UUID toiletId, UUID toiletPaymentOptionId){
+        ToiletPaymentOption link = toiletPaymentOptionRepository.findById(toiletPaymentOptionId).orElseThrow(() -> new EntityNotFoundException("Toilet-payment link not found with id " + toiletPaymentOptionId));
 
         if (!link.getToilet().getId().equals(toiletId)){
-            throw new AccessDeniedException("Payment option does not belong to the specified toilet");
+            throw new AccessDeniedException("Toilet-payment link id does not belong to the specified toilet");
         }
         toiletPaymentOptionRepository.delete(link);
     }
