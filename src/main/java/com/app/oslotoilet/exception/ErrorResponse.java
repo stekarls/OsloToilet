@@ -6,8 +6,9 @@ import java.time.OffsetDateTime;
 
 @Data
 public class ErrorResponse{
-    OffsetDateTime timestamp;
-    int status;
-    String error;
-    String message;
+    private OffsetDateTime timestamp;
+    private int status;
+    private String error;
+    private String message;
+    private String path;
 }

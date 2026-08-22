@@ -1,5 +1,4 @@
-package com.app.oslotoilet.user;
-
+package com.app.oslotoilet.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -7,11 +6,9 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class UserRequestDto {
+public class RegisterRequestDto {
 
     @NotBlank(message = "Nickname is required")
     @Size(min = 5, max = 12, message = "Nickname must be between 5 and 12 characters")
