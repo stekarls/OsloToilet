@@ -11,6 +11,6 @@ import lombok.*;
 @Builder
 public class UserUpdateDto {
     @NotBlank
-    @Size(min = 5, max = 15, message = "Nickname must be between 3 and 15 characters")
+    @Size(min = 5, max = 12, message = "Nickname must be between 5 and 12 characters")
     private String nickname;
 }

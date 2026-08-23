@@ -1,9 +1,11 @@
 package com.app.oslotoilet.review;
 
 
+import com.app.oslotoilet.security.SecurityUser;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +29,7 @@ public class ReviewController {
         List<ReviewResponseDto> reviews = reviewService.getReviews();
         return ResponseEntity.ok(reviews);
     }
+
     @GetMapping("/toilet/{toiletId}")
     public ResponseEntity<List<ReviewResponseDto>> getReviewsByToiletId(@PathVariable UUID toiletId){
         List<ReviewResponseDto> reviews = reviewService.getReviewsByToiletId(toiletId);
@@ -45,12 +48,10 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdReview);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReview(@PathVariable UUID id){
-        reviewService.deleteReview(id);
+    @DeleteMapping("/{reviewId}")
+    public ResponseEntity<Void> deleteReview(@PathVariable UUID reviewId, @AuthenticationPrincipal SecurityUser currentUser) {
+        reviewService.deleteReview(reviewId, currentUser);
         return ResponseEntity.noContent().build();
-
-
     }
 
 

@@ -20,32 +20,39 @@ public class UserController {
         this.userService = userService;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public List<UserResponseDto> getAllUsers(){
-        return userService.getAllUsers();
+    public ResponseEntity<List<UserResponseDto>> getAllUsers(){
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
+
     @GetMapping("/contribution")
-    public List<UserResponseDto> sortByContributionPoints(){
-        return userService.sortByContributionPoints();
+    public ResponseEntity<List<UserResponseDto>> sortByContributionPoints(){
+        return ResponseEntity.ok(userService.sortByContributionPoints());
     }
+
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.user.id")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable UUID id){
         UserResponseDto user = userService.getUserById(id);
             return ResponseEntity.ok(user);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<UserResponseDto> createNewUser(@Valid @RequestBody UserRequestDto user){
-        return new ResponseEntity<>(userService.createNewUser(user), HttpStatus.CREATED);
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping()
+    public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody AdminCreateUserDto user){
+        return new ResponseEntity<>(userService.createUserAsAdmin(user), HttpStatus.CREATED);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id){
         userService.deleteUserById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.user.id")
     @PatchMapping("/{id}")
     public ResponseEntity<UserResponseDto> updateUserById(@PathVariable UUID id, @Valid @RequestBody UserUpdateDto userUpdateDto){
         UserResponseDto response = userService.updateNicknameById(id, userUpdateDto);

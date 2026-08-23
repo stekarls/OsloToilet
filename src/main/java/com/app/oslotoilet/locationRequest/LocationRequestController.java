@@ -2,9 +2,12 @@ package com.app.oslotoilet.locationRequest;
 
 
 import com.app.oslotoilet.enums.RequestStatus;
+import com.app.oslotoilet.security.SecurityUser;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +24,7 @@ public class LocationRequestController {
     }
 
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<LocationRequestResponseDto> getRequests(@RequestParam(required = false) RequestStatus status){
         if (status != null){
@@ -29,20 +33,7 @@ public class LocationRequestController {
         return locationRequestService.getAllRequests();
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<LocationRequestResponseDto> createNewLocationRequest(@Valid @RequestBody LocationRequestDto locationRequest){
-        LocationRequestResponseDto response = locationRequestService.createNewLocationRequest(locationRequest);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteLocationRequestbyId(@PathVariable UUID id){
-        if (locationRequestService.deleteLocationRequestById(id)){
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
-    }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{userId}")
     public List<LocationRequestResponseDto> getRequestsByUser(@PathVariable UUID userId, @RequestParam(required = false) RequestStatus requestStatus){
         if (requestStatus != null){
@@ -51,9 +42,23 @@ public class LocationRequestController {
         return locationRequestService.findByUserIdOrderByCreatedAtDesc(userId);
     }
 
-    @PutMapping("{id}")
-    public ResponseEntity<LocationRequestResponseDto> changeRequestStatus(@PathVariable UUID id, @RequestParam RequestStatus requestStatus, @RequestParam(required = false) String adminComment){
-        LocationRequestResponseDto request = locationRequestService.changeRequestStatus(id, requestStatus, adminComment);
+    @PostMapping("/create")
+    public ResponseEntity<LocationRequestResponseDto> createNewLocationRequest(@Valid @RequestBody LocationRequestDto locationRequest){
+        LocationRequestResponseDto response = locationRequestService.createNewLocationRequest(locationRequest);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+
+    @DeleteMapping("/{locationRequestId}")
+    public ResponseEntity<Void> deleteLocationRequestbyId(@PathVariable UUID locationRequestId, @AuthenticationPrincipal SecurityUser currentUser){
+            locationRequestService.deleteLocationRequestById(locationRequestId, currentUser);
+            return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}")
+    public ResponseEntity<LocationRequestResponseDto> approveRequestStatus(@PathVariable UUID id, @RequestParam RequestStatus requestStatus, @RequestParam(required = false) String adminComment){
+        LocationRequestResponseDto request = locationRequestService.approveRequestStatus(id, requestStatus, adminComment);
         return ResponseEntity.ok(request);
     }
 

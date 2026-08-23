@@ -1,11 +1,14 @@
 package com.app.oslotoilet.review;
 
 import com.app.oslotoilet.enums.ContributionPoints;
+import com.app.oslotoilet.enums.Role;
+import com.app.oslotoilet.security.SecurityUser;
 import com.app.oslotoilet.toilet.Toilet;
 import com.app.oslotoilet.toilet.ToiletRepository;
 import com.app.oslotoilet.user.User;
 import com.app.oslotoilet.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -57,9 +60,13 @@ public class ReviewService {
         return mapToResponseDto(review);
     }
 
-    public void deleteReview(UUID reviewId){
-        if (!reviewRepository.existsById(reviewId)){
-            throw new EntityNotFoundException("Review not found with reviewId: " + reviewId);
+    public void deleteReview(UUID reviewId, SecurityUser currentUser) {
+        boolean isAdmin = currentUser.getUser().getRole() == Role.ADMIN;
+
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new EntityNotFoundException("Review not found with reviewId: " + reviewId));
+
+        if (!isAdmin && !review.getUser().getId().equals(currentUser.getUser().getId())){
+            throw new AccessDeniedException("You can only delete your own reviews");
         }
         reviewRepository.deleteById(reviewId);
     }

@@ -2,13 +2,16 @@ package com.app.oslotoilet.locationRequest;
 
 import com.app.oslotoilet.enums.ContributionPoints;
 import com.app.oslotoilet.enums.RequestStatus;
+import com.app.oslotoilet.enums.Role;
+import com.app.oslotoilet.security.SecurityUser;
 import com.app.oslotoilet.toilet.ToiletRequestDto;
 import com.app.oslotoilet.toilet.ToiletService;
 import com.app.oslotoilet.user.User;
 import com.app.oslotoilet.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -38,13 +41,20 @@ public class LocationRequestService {
         return mapToResponseDto(request);
     }
 
-    public boolean deleteLocationRequestById(UUID id){
-        if (locationRequestRepository.existsById(id)){
-            locationRequestRepository.deleteById(id);
-            return true;
+    public void deleteLocationRequestById(UUID locationRequestId, SecurityUser currentUser){
+
+        boolean isAdmin = currentUser.getUser().getRole() == Role.ADMIN;
+
+        UUID userId = currentUser.getUser().getId();
+
+        LocationRequest locationRequest = locationRequestRepository.findById(locationRequestId)
+                .orElseThrow(() -> new EntityNotFoundException("Location Request not found with ID: " + locationRequestId));
+
+        if (!isAdmin && !locationRequest.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("You are not authorized to delete this location request");
         }
 
-        return false;
+        locationRequestRepository.deleteById(locationRequestId);
     }
 
     public List<LocationRequestResponseDto> getAllRequests(){
@@ -64,7 +74,7 @@ public class LocationRequestService {
     }
 
     @Transactional
-    public LocationRequestResponseDto changeRequestStatus(UUID locationRequestId, RequestStatus newStatus, String adminComment){
+    public LocationRequestResponseDto approveRequestStatus(UUID locationRequestId, RequestStatus newStatus, String adminComment){
 
         LocationRequest request = locationRequestRepository.findById(locationRequestId).orElseThrow(() ->
                 new EntityNotFoundException("Location Request not found with ID: " + locationRequestId));

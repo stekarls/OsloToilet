@@ -2,13 +2,16 @@ package com.app.oslotoilet.errorReport;
 
 
 import com.app.oslotoilet.enums.RequestStatus;
+import com.app.oslotoilet.enums.Role;
+import com.app.oslotoilet.security.SecurityUser;
 import com.app.oslotoilet.toilet.Toilet;
 import com.app.oslotoilet.toilet.ToiletRepository;
 import com.app.oslotoilet.user.User;
 import com.app.oslotoilet.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -47,10 +50,15 @@ public class ErrorReportService {
         return mapToResponseDto(errorReport);
     }
 
-    public void deleteErrorReport(UUID id){
-        if (!errorReportRepository.existsById(id)){
-            throw new EntityNotFoundException("Error report not found");
+    public void deleteErrorReport(UUID id, SecurityUser currentUser){
+        boolean isAdmin = currentUser.getUser().getRole() == Role.ADMIN;
+
+        ErrorReport errorReport = errorReportRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Error report not found with ID: " + id));
+
+        if (!isAdmin && !errorReport.getUser().getId().equals(currentUser.getUser().getId())){
+            throw new AccessDeniedException("You do not have permission to delete this error report");
         }
+
         errorReportRepository.deleteById(id);
 
     }
