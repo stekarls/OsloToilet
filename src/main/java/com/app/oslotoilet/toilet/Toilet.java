@@ -27,13 +27,11 @@ import java.util.UUID;
 @Table(name = "toilets")
 public class Toilet {
 
-    //TODO: adde unique on name
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(length = 128)
+    @Column(length = 128, nullable = false, unique = true)
     @Size(min = 5, message = "Name must be 5 characters in length or more")
     @Size(max = 128, message = "Description cannot exceed 128 characters")
     private String name;

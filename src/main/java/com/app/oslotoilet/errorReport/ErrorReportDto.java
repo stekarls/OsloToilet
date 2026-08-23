@@ -19,6 +19,6 @@ public class ErrorReportDto {
     @NotNull(message = "User ID is required")
     private UUID userId;
     @NotBlank
-    @Size(min = 5, message = "Description must be at least 5 characters long")
+    @Size(min = 5, max = 1000, message = "Description must be between 5 and 1000 characters")
     private String description;
 }

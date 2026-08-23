@@ -33,8 +33,13 @@ public class LocationRequestController {
         return locationRequestService.getAllRequests();
     }
 
+    @GetMapping("/{requestId}")
+    public ResponseEntity<LocationRequestResponseDto> getByLocationRequestId(@PathVariable UUID requestId){
+        return ResponseEntity.ok(locationRequestService.getByLocationRequestId(requestId));
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/{userId}")
+    @GetMapping("/user/{userId}")
     public List<LocationRequestResponseDto> getRequestsByUser(@PathVariable UUID userId, @RequestParam(required = false) RequestStatus requestStatus){
         if (requestStatus != null){
             return locationRequestService.getByUserIdAndRequestStatus(userId, requestStatus);
