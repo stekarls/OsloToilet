@@ -2,6 +2,7 @@ package com.app.oslotoilet.user;
 
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class UserService {
 
     private final UserRepository userRepository;
@@ -35,6 +37,7 @@ public class UserService {
         return mapToResponseDto(user);
     }
 
+    @Transactional
     public UserResponseDto createUserAsAdmin(AdminCreateUserDto requestDto){
         if (userRepository.existsByEmail(requestDto.getEmail())){
             throw new IllegalStateException("User with email " + requestDto.getEmail() + " already exists.");
@@ -54,6 +57,7 @@ public class UserService {
         return mapToResponseDto(userRepository.save(user));
     }
 
+    @Transactional
     public void deleteUserById(UUID userId){
         if (!userRepository.existsById(userId)){
             throw new EntityNotFoundException("User not found with ID: " + userId);
@@ -73,6 +77,24 @@ public class UserService {
         return mapToResponseDto(user);
     }
 
+    @Transactional
+    public UserResponseDto changePassword(UUID id, ChangePasswordDto changePasswordDto){
+
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id));
+
+        if (!passwordEncoder.matches(changePasswordDto.getCurrentPassword(), user.getPassword())){
+            throw new BadCredentialsException("Provided current password does not match the set password");
+        }
+
+        if (passwordEncoder.matches(changePasswordDto.getNewPassword(), user.getPassword() )){
+            throw new IllegalStateException("New password must be different from the current password");
+        }
+
+        user.setPassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
+        return mapToResponseDto(userRepository.save(user));
+    }
+
+    @Transactional
     public void banUser(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
         user.setBanned(true);

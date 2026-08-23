@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/toilet-features")
+@RequestMapping("/api/v1/toilets")
 public class ToiletFeatureController {
     private final ToiletFeatureService toiletFeatureService;
 
@@ -20,7 +20,7 @@ public class ToiletFeatureController {
 
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping
+    @GetMapping("/toilet-feature")
     public ResponseEntity<List<ToiletFeatureResponseDto>> getAllToiletFeatures() {
         List<ToiletFeatureResponseDto> features = toiletFeatureService.getAllToiletFeatures();
         return ResponseEntity.ok(features);

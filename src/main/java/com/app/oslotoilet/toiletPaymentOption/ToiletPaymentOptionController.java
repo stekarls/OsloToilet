@@ -22,7 +22,7 @@ public class ToiletPaymentOptionController {
 
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/payment-options/all")
+    @GetMapping("/payment-options/")
     public ResponseEntity<List<ToiletPaymentOptionResponseDto>> getAllToiletPaymentOptions(){
         return ResponseEntity.ok(toiletPaymentService.getAllToiletPaymentOptions());
     }

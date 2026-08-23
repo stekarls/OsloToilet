@@ -37,7 +37,7 @@ public class FeatureController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{featureId}")
-    public ResponseEntity<FeatureResponseDto> updateFeature(@PathVariable UUID featureId, FeatureUpdateDto featureUpdateDto){
+    public ResponseEntity<FeatureResponseDto> updateFeature(@PathVariable UUID featureId, @RequestBody @Valid FeatureUpdateDto featureUpdateDto){
         return ResponseEntity.ok(featureService.updateFeature(featureId, featureUpdateDto));
     }
 

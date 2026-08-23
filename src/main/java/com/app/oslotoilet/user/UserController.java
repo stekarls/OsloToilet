@@ -44,13 +44,6 @@ public class UserController {
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody AdminCreateUserDto user){
         return new ResponseEntity<>(userService.createUserAsAdmin(user), HttpStatus.CREATED);
     }
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable UUID id){
-        userService.deleteUserById(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
 
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.user.id")
     @PatchMapping("/{id}")
@@ -59,11 +52,24 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.user.id")
+    @PatchMapping("/{id}/password")
+    public ResponseEntity<UserResponseDto> changePassword(@PathVariable UUID id, @RequestBody @Valid ChangePasswordDto changePasswordDto){
+        return ResponseEntity.ok(userService.changePassword(id, changePasswordDto));
+    }
+
     @PatchMapping("/{userId}/ban")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> banUser(@PathVariable UUID userId) {
         userService.banUser(userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID id){
+        userService.deleteUserById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 
