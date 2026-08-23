@@ -31,8 +31,6 @@ public class ErrorReportService {
         this.toiletRepository = toiletRepository;
     }
 
-
-
     public List<ErrorReportDto> getErrorReports(){
         return errorReportRepository.findAll().stream().map(this::mapToResponseDto).toList();
     }

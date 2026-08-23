@@ -5,6 +5,7 @@ import com.app.oslotoilet.enums.RequestStatus;
 import com.app.oslotoilet.toilet.Toilet;
 import com.app.oslotoilet.user.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.OffsetDateTime;
@@ -32,6 +33,7 @@ public class ErrorReport {
     private User user;
 
     @Column(columnDefinition = "TEXT", nullable = false)
+    @Size(min = 5, max = 1000, message = "Description must be between 5 and 1000 characters")
     private String description;
 
     @Column(name = "created_at", nullable = false, updatable = false)

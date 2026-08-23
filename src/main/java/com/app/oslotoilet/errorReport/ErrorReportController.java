@@ -2,6 +2,7 @@ package com.app.oslotoilet.errorReport;
 
 import com.app.oslotoilet.enums.RequestStatus;
 import com.app.oslotoilet.security.SecurityUser;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,8 +32,8 @@ public class ErrorReportController {
         return new ResponseEntity<>(errorReportService.getErrorReports(), HttpStatus.OK);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<ErrorReportDto> createErrorReport(ErrorReportDto errorReportDto){
+    @PostMapping()
+    public ResponseEntity<ErrorReportDto> createErrorReport(@RequestBody @Valid ErrorReportDto errorReportDto){
         ErrorReportDto report = errorReportService.createErrorReport(errorReportDto);
         return new ResponseEntity<>(report, HttpStatus.CREATED);
 

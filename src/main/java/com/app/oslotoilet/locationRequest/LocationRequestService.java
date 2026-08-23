@@ -36,6 +36,11 @@ public class LocationRequestService {
         return locationRequestRepository.findAllWithUser().stream().map(this::mapToResponseDto).toList();
     }
 
+    public LocationRequestResponseDto getByLocationRequestId(UUID requestId){
+        LocationRequest locationRequest = locationRequestRepository.findById(requestId).orElseThrow(() -> new EntityNotFoundException("Location Request with id " + requestId + " not found"));
+        return mapToResponseDto(locationRequest);
+    }
+
     public List<LocationRequestResponseDto> getByRequestStatus(RequestStatus requestStatus){
         return locationRequestRepository.findByRequestStatus(requestStatus).stream().map(this::mapToResponseDto).toList();
     }
