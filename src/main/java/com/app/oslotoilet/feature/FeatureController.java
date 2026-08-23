@@ -8,7 +8,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/feature")
-//@CrossOrigin(origins = "*")
 public class FeatureController {
 
     private final FeatureService featureService;

@@ -2,6 +2,7 @@ package com.app.oslotoilet.user;
 
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +14,12 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
 
-    public UserService(UserRepository userRepository){
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder){
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<UserResponseDto> getAllUsers(){
@@ -32,11 +35,23 @@ public class UserService {
         return mapToResponseDto(user);
     }
 
-    public UserResponseDto createNewUser(UserRequestDto requestDto){
+    public UserResponseDto createUserAsAdmin(AdminCreateUserDto requestDto){
+        if (userRepository.existsByEmail(requestDto.getEmail())){
+            throw new IllegalStateException("User with email " + requestDto.getEmail() + " already exists.");
+        }
+        if (userRepository.existsByNickname(requestDto.getNickname())){
+            throw new IllegalStateException("User with nickname " + requestDto.getNickname() + " already exists.");
+        }
 
-        User user = mapToEntity(requestDto);
-        user = userRepository.save(user);
-        return mapToResponseDto(user);
+        User user = User.builder()
+                .nickname(requestDto.getNickname())
+                .email(requestDto.getEmail())
+                .password(passwordEncoder.encode(requestDto.getPassword()))
+                .role(requestDto.getRole())
+                .contributionPoints(0L)
+                .createdAt(OffsetDateTime.now())
+                .build();
+        return mapToResponseDto(userRepository.save(user));
     }
 
     public void deleteUserById(UUID userId){
@@ -63,13 +78,6 @@ public class UserService {
         user.setBanned(true);
     }
 
-    private User mapToEntity(UserRequestDto requestDto){
-        return User.builder()
-                .nickname(requestDto.getNickname())
-                .contributionPoints(0L)
-                .createdAt(OffsetDateTime.now())
-                .build();
-    }
     private UserResponseDto mapToResponseDto(User user){
         return UserResponseDto.builder()
                 .id(user.getId())

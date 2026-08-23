@@ -3,6 +3,7 @@ package com.app.oslotoilet.paymentOption;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,14 +28,13 @@ public class PaymentOptionController{
         return ResponseEntity.ok(paymentOptionService.getPaymentOptionById(id));
     }
 
-    //TODO: lock these down with Spring Security later
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<PaymentOptionResponseDto> createPaymentOption(
-            @RequestBody @Valid PaymentOptionRequestDto dto) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(paymentOptionService.createPaymentOption(dto));
+    public ResponseEntity<PaymentOptionResponseDto> createPaymentOption(@RequestBody @Valid PaymentOptionRequestDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(paymentOptionService.createPaymentOption(dto));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePaymentOption(@PathVariable UUID id){
         paymentOptionService.deletePaymentOption(id);

@@ -1,8 +1,11 @@
 package com.app.oslotoilet.errorReport;
 
 import com.app.oslotoilet.enums.RequestStatus;
+import com.app.oslotoilet.security.SecurityUser;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +22,7 @@ public class ErrorReportController {
     }
 
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<ErrorReportDto>> getErrorReports(@RequestParam(required = false)RequestStatus status){
         if (status != null){
@@ -35,12 +39,12 @@ public class ErrorReportController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteErrorReport(@PathVariable UUID id){
-        errorReportService.deleteErrorReport(id);
+    public ResponseEntity<Void> deleteErrorReport(@PathVariable UUID id, @AuthenticationPrincipal SecurityUser currentUser){
+        errorReportService.deleteErrorReport(id, currentUser);
         return ResponseEntity.noContent().build();
-
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ErrorReportDto> changeStatus(@PathVariable UUID id, @RequestParam RequestStatus status, @RequestParam(required = false) String adminComment){
         ErrorReportDto report = errorReportService.changeStatus(id, status, adminComment);

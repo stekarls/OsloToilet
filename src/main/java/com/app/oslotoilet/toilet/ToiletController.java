@@ -1,9 +1,9 @@
 package com.app.oslotoilet.toilet;
 
-
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,25 +24,27 @@ public class ToiletController {
         return new ResponseEntity<>(toiletService.findAll(sort), HttpStatus.OK);
     }
 
-    //TODO: do i need different response if not found?
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ToiletResponseDto> findById(@PathVariable UUID id){
         return ResponseEntity.ok(toiletService.findById(id));
     }
 
-    @PostMapping("/create")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping()
     public ResponseEntity<ToiletResponseDto> createToilet(@Valid @RequestBody ToiletRequestDto toiletRequestDto){
         return new ResponseEntity<>(toiletService.createToilet(toiletRequestDto), HttpStatus.CREATED);
     }
 
-    @DeleteMapping("{id}")
-    public ResponseEntity<Void> deleteToilet(UUID id){
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteToilet(@PathVariable UUID id){
         toiletService.deleteToilet(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}")
-    public ResponseEntity<ToiletResponseDto> updateToilet(ToiletUpdateDto toiletUpdateDto, @PathVariable UUID id){
+    public ResponseEntity<ToiletResponseDto> updateToilet(@RequestBody @Valid ToiletUpdateDto toiletUpdateDto, @PathVariable UUID id){
         return ResponseEntity.ok(toiletService.updateToilet(toiletUpdateDto, id));
     }
 
