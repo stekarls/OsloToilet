@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -60,6 +61,11 @@ public class GlobalExceptionHandler{
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResourceFoundException(NoResourceFoundException ex, HttpServletRequest request){
         return buildResponse(HttpStatus.NOT_FOUND, "The requested resource was not found", request);
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(UsernameNotFoundException ex, HttpServletRequest request){
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request);
     }
 
     @ExceptionHandler(Exception.class)

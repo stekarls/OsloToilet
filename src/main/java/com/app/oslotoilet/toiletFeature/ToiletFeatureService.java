@@ -53,7 +53,7 @@ public class ToiletFeatureService {
                 .orElseThrow(() -> new EntityNotFoundException("Feature not found with id: " + dto.getFeatureId()));
 
         if (toiletFeatureRepository.existsByToiletAndFeature(toilet, feature)) {
-            throw new IllegalStateException("Toilet already has feature: " + feature.getCode());
+            throw new IllegalStateException("Toilet already has feature: " + feature.getFeatureCode());
         }
 
         ToiletFeature toiletFeature = ToiletFeature.builder()
@@ -132,7 +132,7 @@ public class ToiletFeatureService {
         return ToiletFeatureResponseDto.builder()
                 .id(tf.getId())
                 .toiletId(tf.getToilet().getId())
-                .featureCode(tf.getFeature().getCode())
+                .featureCode(tf.getFeature().getFeatureCode())
                 .source(tf.getSource())
                 .verified(tf.getVerified())
                 .build();
