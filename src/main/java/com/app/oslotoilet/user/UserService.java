@@ -2,6 +2,7 @@ package com.app.oslotoilet.user;
 
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -71,6 +72,22 @@ public class UserService {
         }
         user.setNickname(updateDto.getNickname());
         return mapToResponseDto(user);
+    }
+
+    public UserResponseDto changePassword(UUID id, ChangePasswordDto changePasswordDto){
+
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id));
+
+        if (!passwordEncoder.matches(changePasswordDto.getCurrentPassword(), user.getPassword())){
+            throw new BadCredentialsException("Provided current password does not match the set password");
+        }
+
+        if (passwordEncoder.matches(changePasswordDto.getNewPassword(), user.getPassword() )){
+            throw new IllegalStateException("New password must be different from the current password");
+        }
+
+        user.setPassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
+        return mapToResponseDto(userRepository.save(user));
     }
 
     public void banUser(UUID userId) {
