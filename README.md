@@ -138,10 +138,15 @@ Authorization: Bearer <token>
 
 - [ ] Flyway database migrations
 - [ ] Refresh tokens
+- [ ] Toke revocation
 - [ ] Pagination on list endpoints
 - [ ] OpenAPI / Swagger documentation
 - [ ] Unit and integration test coverage
 - [ ] Rate limiting on auth endpoints
+- [ ] Database call optimizations
+- [ ] CORS
+- [ ] MODERATOR role implementation
+- [ ] Forgot Password
 
 ## License
 
