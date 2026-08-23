@@ -4,6 +4,7 @@ import com.app.oslotoilet.enums.SourceType;
 import com.app.oslotoilet.feature.Feature;
 import com.app.oslotoilet.toilet.Toilet;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.OffsetDateTime;
@@ -35,5 +36,6 @@ public class ToiletFeature {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "source", nullable = false)
+    @NotNull(message = "Source is required")
     private SourceType source;
 }

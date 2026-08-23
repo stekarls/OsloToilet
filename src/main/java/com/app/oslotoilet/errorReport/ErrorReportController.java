@@ -25,7 +25,7 @@ public class ErrorReportController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<List<ErrorReportDto>> getErrorReports(@RequestParam(required = false)RequestStatus status){
+    public ResponseEntity<List<ErrorReportRequestDto>> getErrorReports(@RequestParam(required = false)RequestStatus status){
         if (status != null){
             return new ResponseEntity<>(errorReportService.getByRequestStatus(status), HttpStatus.OK);
         }
@@ -33,8 +33,8 @@ public class ErrorReportController {
     }
 
     @PostMapping()
-    public ResponseEntity<ErrorReportDto> createErrorReport(@RequestBody @Valid ErrorReportDto errorReportDto){
-        ErrorReportDto report = errorReportService.createErrorReport(errorReportDto);
+    public ResponseEntity<ErrorReportRequestDto> createErrorReport(@RequestBody @Valid ErrorReportRequestDto errorReportRequestDto){
+        ErrorReportRequestDto report = errorReportService.createErrorReport(errorReportRequestDto);
         return new ResponseEntity<>(report, HttpStatus.CREATED);
 
     }
@@ -47,8 +47,8 @@ public class ErrorReportController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<ErrorReportDto> changeStatus(@PathVariable UUID id, @RequestParam RequestStatus status, @RequestParam(required = false) String adminComment){
-        ErrorReportDto report = errorReportService.changeStatus(id, status, adminComment);
+    public ResponseEntity<ErrorReportRequestDto> changeStatus(@PathVariable UUID id, @RequestParam RequestStatus status, @RequestParam(required = false) String adminComment){
+        ErrorReportRequestDto report = errorReportService.changeStatus(id, status, adminComment);
         return ResponseEntity.ok(report);
     }
 

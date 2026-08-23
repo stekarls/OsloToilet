@@ -55,6 +55,7 @@ public class ToiletService {
         if (dto.getAlwaysOpen() != null) toilet.setAlwaysOpen(dto.getAlwaysOpen());
 
         validateToiletState(toilet.isAlwaysOpen(), toilet.isClosed());
+        validateFee(toilet.getFee(), toilet.isHasFee());
 
         if (dto.getDescription() != null) {
             if (dto.getDescription().isEmpty()) {
@@ -70,6 +71,7 @@ public class ToiletService {
                 toilet.setConditions(dto.getConditions());
             }
         }
+        //TODO: Find more efficient way of updating updatedAt field
         toilet.setUpdatedAt(OffsetDateTime.now());
         return mapToResponseDto(toilet);
     }
@@ -117,14 +119,28 @@ public class ToiletService {
             throw new IllegalStateException("A toilet cannot be both always open and closed");
         }
     }
+    private void validateFee(BigDecimal fee, boolean hasFee){
+        if (hasFee) {
+            if (fee == null || fee.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalStateException("Fee must be a value greater than 0 when hasFee is true");
+            }
+        }else {
+            if (fee != null) {
+                throw new IllegalStateException("Fee must be null when hasFee is false");
+            }
+        }
+    }
     private Toilet mapToEntity(ToiletRequestDto toiletRequestDto){
-        BigDecimal fee = toiletRequestDto.isHasFee() ? toiletRequestDto.getFee() : BigDecimal.valueOf(0);
+
+        validateFee(toiletRequestDto.getFee(), toiletRequestDto.isHasFee());
+
+
         return Toilet.builder()
                 .name(toiletRequestDto.getName())
                 .latitude(toiletRequestDto.getLatitude())
                 .longitude(toiletRequestDto.getLongitude())
                 .hasFee(toiletRequestDto.isHasFee())
-                .fee(fee)
+                .fee(toiletRequestDto.getFee())
                 .description(toiletRequestDto.getDescription())
                 .alwaysOpen(toiletRequestDto.isAlwaysOpen())
                 .hasConditions(toiletRequestDto.isHasConditions())

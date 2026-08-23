@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ErrorReportDto {
+public class ErrorReportRequestDto {
     @NotNull(message = "Toilet ID is required")
     private UUID toiletID;
     @NotNull(message = "User ID is required")
