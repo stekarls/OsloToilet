@@ -54,7 +54,7 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.user.id")
     @PatchMapping("/{id}")
-    public ResponseEntity<UserResponseDto> updateUserById(@PathVariable UUID id, @Valid @RequestBody UserUpdateDto userUpdateDto){
+    public ResponseEntity<UserResponseDto> updateNicknameById(@PathVariable UUID id, @Valid @RequestBody UserUpdateDto userUpdateDto){
         UserResponseDto response = userService.updateNicknameById(id, userUpdateDto);
         return ResponseEntity.ok(response);
     }
