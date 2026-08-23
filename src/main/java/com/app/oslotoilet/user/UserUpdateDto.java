@@ -10,7 +10,8 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class UserUpdateDto {
-    @NotBlank
+
+    @NotBlank(message = "Username is required")
     @Size(min = 5, max = 12, message = "Nickname must be between 5 and 12 characters")
     private String nickname;
 }

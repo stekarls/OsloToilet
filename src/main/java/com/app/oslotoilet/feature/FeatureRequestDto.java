@@ -2,6 +2,7 @@ package com.app.oslotoilet.feature;
 
 import com.app.oslotoilet.enums.FeatureCode;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -12,7 +13,7 @@ import lombok.*;
 @Builder
 public class FeatureRequestDto {
 
-    @NotBlank (message = "FeatureCode is required")
+    @NotNull(message = "FeatureCode is required")
     private FeatureCode featureCode;
 
     @NotBlank(message = "Description is required")

@@ -2,6 +2,7 @@ package com.app.oslotoilet.paymentOption;
 
 import com.app.oslotoilet.enums.PaymentCode;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.UUID;
@@ -21,6 +22,7 @@ public class PaymentOption{
     private UUID id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_option", nullable = false, unique = true, length = 50)
+    @Column(name = "payment_option", nullable = false, unique = true, length = 32)
+    @NotNull(message = "Payment option code is required")
     private PaymentCode code;
 }

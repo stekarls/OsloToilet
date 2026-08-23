@@ -31,23 +31,22 @@ public class Review {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    @NotNull(message = "User is required")
     private User user;
 
     @Column(name = "rating_cleanliness")
-    @Min(value = 0)
-    @Max(value = 5)
+    @Min(value = 1, message = "Cleanliness rating must be at least 1")
+    @Max(value = 5, message = "Cleanliness rating cannot exceed 5")
     @NotNull(message = "Cleanliness rating is required")
     private Short cleanliness;
 
-    @Min(value = 0)
-    @Max(value = 5)
+    @Min(value = 1, message = "Accessibility rating must be at least 1")
+    @Max(value = 5, message = "Accessibility rating cannot exceed 5")
     @NotNull(message = "Equipment rating is required")
     @Column(name = "rating_equipment")
     private Short equipment;
 
-    @Min(value = 0)
-    @Max(value = 5)
+    @Min(value = 1, message = "Accessibility rating must be at least 1")
+    @Max(value = 5, message = "Accessibility rating cannot exceed 5")
     @NotNull(message = "Access rating is required")
     @Column(name = "rating_access")
     private Short access;

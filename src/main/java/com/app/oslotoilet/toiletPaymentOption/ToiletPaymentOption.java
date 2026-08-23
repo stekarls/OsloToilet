@@ -5,6 +5,7 @@ import com.app.oslotoilet.enums.SourceType;
 import com.app.oslotoilet.paymentOption.PaymentOption;
 import com.app.oslotoilet.toilet.Toilet;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.OffsetDateTime;
@@ -35,6 +36,7 @@ public class ToiletPaymentOption {
     private OffsetDateTime verifiedAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "source", length = 32)
+    @NotNull(message = "Source is required")
+    @Column(name = "source", length = 32, nullable = false)
     private SourceType source;
 }

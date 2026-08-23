@@ -31,20 +31,20 @@ public class ErrorReportService {
         this.toiletRepository = toiletRepository;
     }
 
-    public List<ErrorReportDto> getErrorReports(){
+    public List<ErrorReportRequestDto> getErrorReports(){
         return errorReportRepository.findAll().stream().map(this::mapToResponseDto).toList();
     }
 
-    public List<ErrorReportDto> getByRequestStatus(RequestStatus status){
+    public List<ErrorReportRequestDto> getByRequestStatus(RequestStatus status){
         return errorReportRepository.findByStatus(status).stream().map(this::mapToResponseDto).toList();
     }
 
     @Transactional
-    public ErrorReportDto createErrorReport(ErrorReportDto errorReportDto){
-        User user = userRepository.findById(errorReportDto.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + errorReportDto.getUserId()));
-        Toilet toilet = toiletRepository.findById(errorReportDto.getToiletID()).orElseThrow(() -> new EntityNotFoundException("Toilet not found with ID: " + errorReportDto.getToiletID()));
+    public ErrorReportRequestDto createErrorReport(ErrorReportRequestDto errorReportRequestDto){
+        User user = userRepository.findById(errorReportRequestDto.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + errorReportRequestDto.getUserId()));
+        Toilet toilet = toiletRepository.findById(errorReportRequestDto.getToiletID()).orElseThrow(() -> new EntityNotFoundException("Toilet not found with ID: " + errorReportRequestDto.getToiletID()));
 
-        ErrorReport errorReport = mapToEntity(errorReportDto, user, toilet);
+        ErrorReport errorReport = mapToEntity(errorReportRequestDto, user, toilet);
         errorReport =  errorReportRepository.save(errorReport);
         return mapToResponseDto(errorReport);
     }
@@ -64,7 +64,7 @@ public class ErrorReportService {
     }
 
     @Transactional
-    public ErrorReportDto changeStatus(UUID reportId, RequestStatus status, String adminComment){
+    public ErrorReportRequestDto changeStatus(UUID reportId, RequestStatus status, String adminComment){
         ErrorReport errorReport = errorReportRepository.findById(reportId).orElseThrow(() -> new EntityNotFoundException("Error report not found with ID: " + reportId));
 
         if (adminComment != null){
@@ -72,6 +72,8 @@ public class ErrorReportService {
         }
 
         errorReport.setStatus(status);
+        //TODO: find better way of updating the updated field
+        errorReport.setUpdated(OffsetDateTime.now());
 
         return mapToResponseDto(errorReport);
 
@@ -79,19 +81,20 @@ public class ErrorReportService {
 
 
 
-    private ErrorReport mapToEntity(ErrorReportDto errorReportDto, User user, Toilet toilet){
+    private ErrorReport mapToEntity(ErrorReportRequestDto errorReportRequestDto, User user, Toilet toilet){
         return ErrorReport.builder()
                 .toilet(toilet)
                 .user(user)
-                .description(errorReportDto.getDescription())
+                .description(errorReportRequestDto.getDescription())
                 .created(OffsetDateTime.now())
+                .updated(OffsetDateTime.now())
                 .adminComment("")
                 .status(RequestStatus.PENDING)
                 .build();
     }
 
-    private ErrorReportDto mapToResponseDto(ErrorReport errorReport){
-        return ErrorReportDto.builder()
+    private ErrorReportRequestDto mapToResponseDto(ErrorReport errorReport){
+        return ErrorReportRequestDto.builder()
                 .toiletID(errorReport.getToilet().getId())
                 .userId(errorReport.getUser().getId())
                 .description(errorReport.getDescription())

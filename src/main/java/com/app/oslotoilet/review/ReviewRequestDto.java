@@ -17,22 +17,26 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewRequestDto {
+
     @NotNull(message = "Toilet ID is required")
     private UUID toiletId;
 
     @NotNull(message = "User ID is required")
     private UUID userId;
 
+    @Min(value = 1, message = "Cleanliness rating must be at least 1")
+    @Max(value = 5, message = "Cleanliness rating cannot exceed 5")
     @NotNull(message = "Cleanliness rating is required")
-    @Min(value = 0) @Max(value = 5)
     private Short cleanliness;
 
+    @Min(value = 1, message = "Equipment rating must be at least 1")
+    @Max(value = 5, message = "Equipment rating cannot exceed 5")
     @NotNull(message = "Equipment rating is required")
-    @Min(value = 0) @Max(value = 5)
     private Short equipment;
 
+    @Min(value = 1, message = "Access rating must be at least 1")
+    @Max(value = 5, message = "Access rating cannot exceed 5")
     @NotNull(message = "Access rating is required")
-    @Min(value = 0) @Max(value = 5)
     private Short access;
 
     @Size(max = 1000, message = "Comment cannot exceed 1000 characters")

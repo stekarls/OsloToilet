@@ -16,6 +16,7 @@ public class LocationRequestDto {
     private UUID userId;
 
     @NotBlank(message = "Name is required")
+    @Size(min = 5, max = 64, message = "Toilet name must be between 5 and 64 characters")
     private String name;
 
     @NotNull(message = "Latitude is required")
@@ -26,12 +27,12 @@ public class LocationRequestDto {
     @DecimalMin("-180.0") @DecimalMax("180.0")
     private BigDecimal longitude;
 
+    @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     @NotBlank(message = "Description is required")
     private String description;
 
     private boolean hasFee;
 
-    @NotNull(message = "Fee amount is required")
-    @DecimalMin("0.0")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Fee must be greater than 0")
     private BigDecimal fee;
 }

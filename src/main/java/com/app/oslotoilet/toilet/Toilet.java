@@ -7,9 +7,7 @@ import com.app.oslotoilet.review.Review;
 import com.app.oslotoilet.toiletFeature.ToiletFeature;
 import com.app.oslotoilet.toiletPaymentOption.ToiletPaymentOption;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -31,30 +29,35 @@ public class Toilet {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(length = 128, nullable = false, unique = true)
-    @Size(min = 5, message = "Name must be 5 characters in length or more")
-    @Size(max = 128, message = "Description cannot exceed 128 characters")
+    @NotBlank(message = "toilet name is required")
+    @Column(length = 64, nullable = false, unique = true)
+    @Size(min = 5, max = 64, message = "Toilet name must be between 5 and 64 characters")
     private String name;
 
     @Column(precision = 9, scale = 6, nullable = false)
-    @DecimalMin("-90.0") @DecimalMax("90.0")
+    @NotNull(message = "Latitude is required")
+    @DecimalMin("-90.0")
+    @DecimalMax("90.0")
     private BigDecimal latitude;
 
     @Column(precision = 9, scale = 6, nullable = false)
-    @DecimalMin("-180.0") @DecimalMax("180.0")
+    @NotNull(message = "Longitude is required")
+    @DecimalMin("-180.0")
+    @DecimalMax("180.0")
     private BigDecimal longitude;
 
-    @Column(name = "has_fee")
+    @Column(name = "has_fee", nullable = false)
     private boolean hasFee;
 
-    @Column(precision = 10, scale = 2, nullable = false)
+    @Column(precision = 10, scale = 2)
+    @DecimalMin(value = "0.0", inclusive = false, message = "Fee must be greater than 0")
     private BigDecimal fee;
 
     @Column(columnDefinition = "TEXT")
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
 
-    @Column(name = "has_conditions")
+    @Column(name = "has_conditions", nullable = false)
     private boolean hasConditions;
 
     @Column(columnDefinition = "TEXT")
@@ -64,13 +67,13 @@ public class Toilet {
     @Column(name = "always_open", nullable = false)
     private boolean alwaysOpen;
 
-    @Column(name = "is_seasonal")
+    @Column(name = "is_seasonal", nullable = false)
     private boolean isSeasonal;
 
-    @Column(name = "is_closed")
+    @Column(name = "is_closed",nullable = false)
     private boolean isClosed;
 
-    @Column(updatable = false, nullable = false)
+    @Column(name = "added", updatable = false, nullable = false)
     private OffsetDateTime added;
 
     @Column(name = "updated_at", nullable = false)
