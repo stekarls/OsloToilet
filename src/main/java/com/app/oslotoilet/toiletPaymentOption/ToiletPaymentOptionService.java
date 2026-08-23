@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class ToiletPaymentOptionService {
 
     private final ToiletPaymentOptionRepository toiletPaymentOptionRepository;
@@ -29,16 +29,17 @@ public class ToiletPaymentOptionService {
         this.toiletRepository = toiletRepository;
         this.paymentOptionRepository = paymentOptionRepository;
     }
-    @Transactional(readOnly = true)
+
     public List<ToiletPaymentOptionResponseDto> getAllToiletPaymentOptions(){
         return toiletPaymentOptionRepository.findAll().stream().map(this::mapToResponseDto).toList();
     }
-    @Transactional(readOnly = true)
+
     public List<ToiletPaymentOptionResponseDto> getPaymentOptionsForToilet(UUID toiletId){
         Toilet toilet = toiletRepository.findById(toiletId).orElseThrow(() -> new EntityNotFoundException("Toilet not found with id " + toiletId));
         return toiletPaymentOptionRepository.findByToilet(toilet).stream().map(this::mapToResponseDto).toList();
     }
 
+    @Transactional
     public ToiletPaymentOptionResponseDto addPaymentOption(UUID toiletId, ToiletPaymentOptionRequestDto dto){
         Toilet toilet = toiletRepository.findById(toiletId).orElseThrow(() -> new EntityNotFoundException("Toilet not found with id " + toiletId));
         UUID paymentOptionId = dto.getPaymentOptionId();
@@ -57,6 +58,7 @@ public class ToiletPaymentOptionService {
         return mapToResponseDto(toiletPaymentOptionRepository.save(toiletPaymentOption));
     }
 
+    @Transactional
     public List<ToiletPaymentOptionResponseDto> addPaymentOptions(UUID toiletId, ToiletPaymentOptionBulkRequestDto dto){
         Toilet toilet = toiletRepository.findById(toiletId).orElseThrow(() -> new EntityNotFoundException("Toilet not found with id " + toiletId));
 
@@ -92,6 +94,7 @@ public class ToiletPaymentOptionService {
         return toiletPaymentOptionRepository.saveAll(toSave).stream().map(this::mapToResponseDto).toList();
     }
 
+    @Transactional
     public ToiletPaymentOptionResponseDto verifyPaymentOption(UUID toiletId, UUID toiletPaymentOptionId){
         ToiletPaymentOption link = toiletPaymentOptionRepository.findById(toiletPaymentOptionId).orElseThrow(() -> new EntityNotFoundException("Toilet-payment link not found with id " + toiletPaymentOptionId));
 
@@ -102,6 +105,7 @@ public class ToiletPaymentOptionService {
         return mapToResponseDto(link);
     }
 
+    @Transactional
     public void removePaymentOptionFromToilet(UUID toiletId, UUID toiletPaymentOptionId){
         ToiletPaymentOption link = toiletPaymentOptionRepository.findById(toiletPaymentOptionId).orElseThrow(() -> new EntityNotFoundException("Toilet-payment link not found with id " + toiletPaymentOptionId));
 

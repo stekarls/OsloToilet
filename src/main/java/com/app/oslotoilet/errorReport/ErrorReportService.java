@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class ErrorReportService {
 
     private final ErrorReportRepository errorReportRepository;
@@ -36,7 +37,7 @@ public class ErrorReportService {
         return errorReportRepository.findAll().stream().map(this::mapToResponseDto).toList();
     }
 
-    public List<ErrorReportDto> findByRequestStatus(RequestStatus status){
+    public List<ErrorReportDto> getByRequestStatus(RequestStatus status){
         return errorReportRepository.findByStatus(status).stream().map(this::mapToResponseDto).toList();
     }
 
@@ -50,6 +51,7 @@ public class ErrorReportService {
         return mapToResponseDto(errorReport);
     }
 
+    @Transactional
     public void deleteErrorReport(UUID id, SecurityUser currentUser){
         boolean isAdmin = currentUser.getUser().getRole() == Role.ADMIN;
 

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class PaymentOptionService {
 
     private final PaymentOptionRepository paymentOptionRepository;
@@ -17,7 +17,7 @@ public class PaymentOptionService {
         this.paymentOptionRepository = paymentOptionRepository;
     }
 
-    @Transactional(readOnly = true)
+
     public List<PaymentOptionResponseDto> getAllPaymentOptions(){
         return paymentOptionRepository.findAll()
                 .stream()
@@ -25,13 +25,13 @@ public class PaymentOptionService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public PaymentOptionResponseDto getPaymentOptionById(UUID paymentOptionId){
         return paymentOptionRepository.findById(paymentOptionId)
                 .map(this::mapToResponseDto)
                 .orElseThrow(() -> new EntityNotFoundException("Payment option not found with paymentOptionId: " + paymentOptionId));
     }
 
+    @Transactional
     public PaymentOptionResponseDto createPaymentOption(PaymentOptionRequestDto dto){
         if (paymentOptionRepository.existsByCode(dto.getCode())) {
             throw new IllegalStateException("Payment option already exists: " + dto.getCode());
@@ -44,6 +44,7 @@ public class PaymentOptionService {
         return mapToResponseDto(paymentOptionRepository.save(paymentOption));
     }
 
+    @Transactional
     public void deletePaymentOption(UUID paymentOptionId){
         if (!paymentOptionRepository.existsById(paymentOptionId)){
             throw new EntityNotFoundException("Payment option not found with paymentOptionId: " + paymentOptionId);

@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -25,6 +25,7 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
+    @Transactional
     public AuthResponseDto register(RegisterRequestDto registerRequest){
 
         if(userRepository.existsByEmail(registerRequest.getEmail())){

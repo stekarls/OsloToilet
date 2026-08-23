@@ -15,7 +15,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class OpeningHoursService {
 
     private final OpeningHoursRepository openingHoursRepository;
@@ -26,6 +26,17 @@ public class OpeningHoursService {
         this.toiletRepository = toiletRepository;
     }
 
+    public List<OpeningHoursResponseDto> getOpeningHoursForToilet(UUID toiletId) {
+        Toilet toilet = toiletRepository.findById(toiletId)
+                .orElseThrow(() -> new EntityNotFoundException("Toilet not found with id: " + toiletId));
+
+        return openingHoursRepository.findByToiletOrderByDayOfWeekAsc(toilet)
+                .stream()
+                .map(this::mapToResponseDto)
+                .toList();
+    }
+
+    @Transactional
     public OpeningHoursResponseDto addOpeningHours(UUID toiletId, OpeningHoursRequestDto dto) {
         Toilet toilet = toiletRepository.findById(toiletId)
                 .orElseThrow(() -> new EntityNotFoundException("Toilet not found with id: " + toiletId));
@@ -44,6 +55,7 @@ public class OpeningHoursService {
         return mapToResponseDto(openingHoursRepository.save(openingHours));
     }
 
+    @Transactional
     public List<OpeningHoursResponseDto> addBulkOpeningHours(UUID toiletId, OpeningHoursBulkRequestDto dto){
         Toilet toilet = toiletRepository.findById(toiletId)
                 .orElseThrow(() -> new EntityNotFoundException("Toilet not found with id: " + toiletId));
@@ -85,17 +97,7 @@ public class OpeningHoursService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
-    public List<OpeningHoursResponseDto> getOpeningHoursForToilet(UUID toiletId) {
-        Toilet toilet = toiletRepository.findById(toiletId)
-                .orElseThrow(() -> new EntityNotFoundException("Toilet not found with id: " + toiletId));
-
-        return openingHoursRepository.findByToiletOrderByDayOfWeekAsc(toilet)
-                .stream()
-                .map(this::mapToResponseDto)
-                .toList();
-    }
-
+    @Transactional
     public OpeningHoursResponseDto updateOpeningHours(UUID toiletId, UUID openingHoursId, OpeningHoursUpdateDto dto) {
         OpeningHours openingHours = openingHoursRepository.findById(openingHoursId)
                 .orElseThrow(() -> new EntityNotFoundException("Opening hours not found with id: " + openingHoursId));
@@ -110,6 +112,7 @@ public class OpeningHoursService {
         return mapToResponseDto(openingHours);
     }
 
+    @Transactional
     public void deleteOpeningHours(UUID toiletId, UUID openingHoursId) {
         OpeningHours openingHours = openingHoursRepository.findById(openingHoursId)
                 .orElseThrow(() -> new EntityNotFoundException("Opening hours not found with id: " + openingHoursId));

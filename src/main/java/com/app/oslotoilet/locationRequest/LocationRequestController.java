@@ -28,7 +28,7 @@ public class LocationRequestController {
     @GetMapping
     public List<LocationRequestResponseDto> getRequests(@RequestParam(required = false) RequestStatus status){
         if (status != null){
-            return locationRequestService.findByRequestStatus(status);
+            return locationRequestService.getByRequestStatus(status);
         }
         return locationRequestService.getAllRequests();
     }
@@ -37,9 +37,9 @@ public class LocationRequestController {
     @GetMapping("/{userId}")
     public List<LocationRequestResponseDto> getRequestsByUser(@PathVariable UUID userId, @RequestParam(required = false) RequestStatus requestStatus){
         if (requestStatus != null){
-            return locationRequestService.findByuserIdAndRequestStatus(userId, requestStatus);
+            return locationRequestService.getByUserIdAndRequestStatus(userId, requestStatus);
         }
-        return locationRequestService.findByUserIdOrderByCreatedAtDesc(userId);
+        return locationRequestService.getByUserIdOrderByCreatedAtDesc(userId);
     }
 
     @PostMapping("/create")

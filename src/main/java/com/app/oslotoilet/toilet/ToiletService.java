@@ -11,6 +11,7 @@ import java.util.UUID;
 
 
 @Service
+@Transactional(readOnly = true)
 public class ToiletService {
 
     private final ToiletRepository toiletRepository;
@@ -18,7 +19,6 @@ public class ToiletService {
     public ToiletService(ToiletRepository toiletRepository){
         this.toiletRepository = toiletRepository;
     }
-
 
     public List<ToiletResponseDto> findAll(String sort){
         return toiletSortMapper(sort).stream().map(this::mapToResponseDto).toList();
@@ -38,6 +38,7 @@ public class ToiletService {
         return mapToResponseDto(toilet);
 
     }
+
     @Transactional
     public ToiletResponseDto updateToilet(ToiletUpdateDto dto, UUID toiletId){
         Toilet toilet = toiletRepository.findById(toiletId)
@@ -73,7 +74,7 @@ public class ToiletService {
         return mapToResponseDto(toilet);
     }
 
-
+    @Transactional
     public void deleteToilet(UUID toiletId){
         if (!toiletRepository.existsById(toiletId)){
             throw new EntityNotFoundException("Toilet not found with ID: " + toiletId);
@@ -111,7 +112,6 @@ public class ToiletService {
         }
         return toiletRepository.findAll();
     }
-
     private void validateToiletState(boolean alwaysOpen, boolean closed) {
         if (alwaysOpen && closed) {
             throw new IllegalStateException("A toilet cannot be both always open and closed");

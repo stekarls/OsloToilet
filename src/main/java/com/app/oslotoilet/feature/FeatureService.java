@@ -3,11 +3,13 @@ package com.app.oslotoilet.feature;
 import com.app.oslotoilet.enums.FeatureCode;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class FeatureService {
 
     private final FeatureRepository featureRepository;
@@ -25,6 +27,7 @@ public class FeatureService {
         return mapToResponseDto(feature);
     }
 
+    @Transactional
     public FeatureResponseDto createFeature(FeatureRequestDto featureRequestDto){
         FeatureCode featureCode = featureRequestDto.getFeatureCode();
         boolean exists = featureRepository.existsByFeatureCode(featureCode);
@@ -41,6 +44,7 @@ public class FeatureService {
         return mapToResponseDto(featureRepository.save(newFeature));
     }
 
+    @Transactional
     public void deleteFeature(UUID featureId){
         if (!featureRepository.existsById(featureId)){
             throw new EntityNotFoundException("Feature not found with id: " + featureId);
@@ -48,6 +52,7 @@ public class FeatureService {
         featureRepository.deleteById(featureId);
     }
 
+    @Transactional
     public FeatureResponseDto updateFeature( UUID featureId, FeatureUpdateDto featureUpdateDto){
         Feature feature = featureRepository.findById(featureId)
                 .orElseThrow(() -> new EntityNotFoundException("Feature not found with id: " + featureId));
