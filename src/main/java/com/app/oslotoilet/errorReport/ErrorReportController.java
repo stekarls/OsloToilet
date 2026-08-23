@@ -26,7 +26,7 @@ public class ErrorReportController {
     @GetMapping
     public ResponseEntity<List<ErrorReportDto>> getErrorReports(@RequestParam(required = false)RequestStatus status){
         if (status != null){
-            return new ResponseEntity<>(errorReportService.findByRequestStatus(status), HttpStatus.OK);
+            return new ResponseEntity<>(errorReportService.getByRequestStatus(status), HttpStatus.OK);
         }
         return new ResponseEntity<>(errorReportService.getErrorReports(), HttpStatus.OK);
     }

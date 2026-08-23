@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class LocationRequestService {
 
     private final LocationRequestRepository locationRequestRepository;
@@ -31,6 +32,21 @@ public class LocationRequestService {
         this.toiletService = toiletService;
     }
 
+    public List<LocationRequestResponseDto> getAllRequests(){
+        return locationRequestRepository.findAllWithUser().stream().map(this::mapToResponseDto).toList();
+    }
+
+    public List<LocationRequestResponseDto> getByRequestStatus(RequestStatus requestStatus){
+        return locationRequestRepository.findByRequestStatus(requestStatus).stream().map(this::mapToResponseDto).toList();
+    }
+
+    public List<LocationRequestResponseDto> getByUserIdAndRequestStatus(UUID userId, RequestStatus requestStatus){
+        return locationRequestRepository.findByuserIdAndRequestStatus(userId, requestStatus).stream().map(this::mapToResponseDto).toList();
+    }
+
+    public List<LocationRequestResponseDto> getByUserIdOrderByCreatedAtDesc(UUID userId){
+        return locationRequestRepository.findByUserIdOrderByCreatedAtDesc(userId).stream().map(this::mapToResponseDto).toList();
+    }
     @Transactional
     public LocationRequestResponseDto createNewLocationRequest(LocationRequestDto locationRequest){
         User user = userRepository.findById(locationRequest.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + locationRequest.getUserId()));
@@ -41,6 +57,7 @@ public class LocationRequestService {
         return mapToResponseDto(request);
     }
 
+    @Transactional
     public void deleteLocationRequestById(UUID locationRequestId, SecurityUser currentUser){
 
         boolean isAdmin = currentUser.getUser().getRole() == Role.ADMIN;
@@ -55,22 +72,6 @@ public class LocationRequestService {
         }
 
         locationRequestRepository.deleteById(locationRequestId);
-    }
-
-    public List<LocationRequestResponseDto> getAllRequests(){
-        return locationRequestRepository.findAllWithUser().stream().map(this::mapToResponseDto).toList();
-    }
-
-    public List<LocationRequestResponseDto> findByRequestStatus(RequestStatus requestStatus){
-        return locationRequestRepository.findByRequestStatus(requestStatus).stream().map(this::mapToResponseDto).toList();
-    }
-
-    public List<LocationRequestResponseDto> findByuserIdAndRequestStatus(UUID userId, RequestStatus requestStatus){
-        return locationRequestRepository.findByuserIdAndRequestStatus(userId, requestStatus).stream().map(this::mapToResponseDto).toList();
-    }
-
-    public List<LocationRequestResponseDto> findByUserIdOrderByCreatedAtDesc(UUID userId){
-        return locationRequestRepository.findByUserIdOrderByCreatedAtDesc(userId).stream().map(this::mapToResponseDto).toList();
     }
 
     @Transactional

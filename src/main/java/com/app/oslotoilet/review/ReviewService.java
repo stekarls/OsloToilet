@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class ReviewService {
 
     private final ToiletRepository toiletRepository;
@@ -60,6 +61,7 @@ public class ReviewService {
         return mapToResponseDto(review);
     }
 
+    @Transactional
     public void deleteReview(UUID reviewId, SecurityUser currentUser) {
         boolean isAdmin = currentUser.getUser().getRole() == Role.ADMIN;
 
