@@ -76,9 +76,7 @@ Access control is enforced with `@PreAuthorize`, combining role checks (`hasRole
 
 ### Prerequisites
 
-- Java 22+
-- Maven
-- PostgreSQL
+- Docker
 
 ### Setup
 
@@ -89,17 +87,18 @@ Access control is enforced with `@PreAuthorize`, combining role checks (`hasRole
    cd OsloToilet
    ```
 
-2. Create a PostgreSQL database and update `application.properties` with your connection details.
-
-3. Set the required environment variable for JWT signing:
-
-   ```bash
-   JWT_SECRET=<a long, random, base64-encoded secret>
+2. (optional) create .env file and set these variables yourself or use default
+   ```
+   JWT_SECRET_KEY=<a long, random, base64-encoded secret>
+   DB_USERNAME=<username>
+   DB_PASSWORD=<password>
+   
    ```
 
-4. Run the application:
-   ```bash
-   ./mvnw spring-boot:run
+4. Run docker compose command
+
+   ```docker
+   docker compose up
    ```
 
 The API will be available at `http://localhost:8080`.
