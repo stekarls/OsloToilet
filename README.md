@@ -83,7 +83,7 @@ Access control is enforced with `@PreAuthorize`, combining role checks (`hasRole
 1. Clone the repository
 
    ```bash
-   git clone https://github.com/<your-username>/OsloToilet.git
+   git clone https://github.com/stekarls/OsloToilet.git
    cd OsloToilet
    ```
 
