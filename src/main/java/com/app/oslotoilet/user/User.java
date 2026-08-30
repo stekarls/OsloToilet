@@ -47,10 +47,10 @@ public class User {
 
     @Column(name = "contribution_points", nullable = false)
     @NotNull(message = "Contribution points is required")
-    private Long contributionPoints = 0L;
+    private Long contributionPoints;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt = OffsetDateTime.now();
+    private OffsetDateTime createdAt;
 
     @Column(name = "banned", nullable = false)
     @NotNull(message = "Banned status is required")
