@@ -1,0 +1,26 @@
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - JWT_SECRET=${JWT_SECRET_KEY:-dev_default_secret_key_12345}
+      - DATASOURCE_URL=jdbc:postgresql://db:5432/oslo_toilet
+      - USERNAME=${DB_USERNAME:-postgres}
+      - PASSWORD=${DB_PASSWORD:-postgres}
+    depends_on:
+      - db
+
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=oslo_toilet
+      - POSTGRES_USER=${DB_USERNAME:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+#    volumes:
+#      - db_data:/var/lib/postgresql/data
+#volumes:
+#    db_data:
