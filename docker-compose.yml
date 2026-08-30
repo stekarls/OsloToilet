@@ -5,7 +5,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - JWT_SECRET=${JWT_SECRET_KEY:-dev_default_secret_key_12345}
+      - JWT_SECRET="${JWT_SECRET_KEY:-aCRXQICGee4xm3092CammuN+oFKKKB17JnCTES6lqfc}"
       - DATASOURCE_URL=jdbc:postgresql://db:5432/oslo_toilet
       - USERNAME=${DB_USERNAME:-postgres}
       - PASSWORD=${DB_PASSWORD:-postgres}
