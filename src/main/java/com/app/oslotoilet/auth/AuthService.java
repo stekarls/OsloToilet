@@ -59,6 +59,7 @@ public class AuthService {
     }
 
     public AuthResponseDto login(LoginRequestDto loginRequest){
+        System.out.println(loginRequest.getEmail() + " " + loginRequest.getPassword());
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
