@@ -115,7 +115,7 @@ public class ToiletFeatureService {
             throw new AccessDeniedException("Toilet-featrue link does not belong to toilet with id: " + toiletId);
         }
 
-        link.setVerified(OffsetDateTime.now());
+        link.setVerifiedAt(OffsetDateTime.now());
         return mapToResponseDto(link);
     }
 
@@ -137,7 +137,7 @@ public class ToiletFeatureService {
                 .toiletId(tf.getToilet().getId())
                 .featureCode(tf.getFeature().getFeatureCode())
                 .source(tf.getSource())
-                .verified(tf.getVerified())
+                .verified(tf.getVerifiedAt())
                 .build();
     }
 

@@ -31,8 +31,8 @@ public class ToiletFeature {
     @JoinColumn(name = "feature_id", nullable = false)
     private Feature feature;
 
-    @Column(name = "verified", nullable = false)
-    private OffsetDateTime verified;
+    @Column(name = "verified_at")
+    private OffsetDateTime verifiedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "source", nullable = false)
