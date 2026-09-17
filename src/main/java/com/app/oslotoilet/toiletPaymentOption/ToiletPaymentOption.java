@@ -32,7 +32,7 @@ public class ToiletPaymentOption {
     @JoinColumn(name = "payment_option_id", nullable = false)
     private PaymentOption paymentOption;
 
-    @Column(name = "verified")
+    @Column(name = "verified_at")
     private OffsetDateTime verifiedAt;
 
     @Enumerated(EnumType.STRING)
