@@ -16,6 +16,7 @@ OsloToilet lets users find public toilets, see their features (wheelchair access
 - **Location requests** — users suggest new toilets; admins review and approve
 - **JWT authentication** with role-based access control (`USER`, `MODERATOR`, `ADMIN`)
 - **Contribution points** leaderboard
+- **Flyway migrations**
 
 ## Tech Stack
 
@@ -135,7 +136,6 @@ Authorization: Bearer <token>
 
 ## Roadmap
 
-- [ ] Flyway database migrations
 - [ ] Refresh tokens
 - [ ] Toke revocation
 - [ ] Pagination on list endpoints
