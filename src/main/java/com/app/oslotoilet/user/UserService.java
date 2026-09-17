@@ -100,6 +100,12 @@ public class UserService {
         user.setBanned(true);
     }
 
+    @Transactional
+    public void unBanUser(UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        user.setBanned(false);
+    }
+
     private UserResponseDto mapToResponseDto(User user){
         return UserResponseDto.builder()
                 .id(user.getId())
@@ -108,5 +114,7 @@ public class UserService {
                 .createdAt(user.getCreatedAt())
                 .build();
     }
+
+    //TODO: Add service and endpoint for changing role for a user
 
 }
