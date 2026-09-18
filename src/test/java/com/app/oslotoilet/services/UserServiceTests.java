@@ -1,5 +1,6 @@
 package com.app.oslotoilet.services;
 
+import com.app.oslotoilet.enums.Role;
 import com.app.oslotoilet.user.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -40,7 +41,9 @@ public class UserServiceTests {
         mockUser = User.builder()
                 .id(userId)
                 .nickname("TestUser")
+                .email("test@example.com")
                 .password("hashed-old-password")
+                .role(Role.USER)
                 .contributionPoints(10L)
                 .createdAt(OffsetDateTime.now())
                 .banned(false)

@@ -1,15 +1,18 @@
-package com.app.oslotoilet.services;
+package com.app.oslotoilet.repositories;
 
-
+import com.app.oslotoilet.enums.Role;
 import com.app.oslotoilet.user.User;
 import com.app.oslotoilet.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -19,8 +22,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
-@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
+@Testcontainers
+@AutoConfigureTestDatabase (replace = AutoConfigureTestDatabase.Replace.NONE)
 public class UserRepositoryTests {
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16");
 
     @Autowired
     private UserRepository userRepository;
@@ -34,11 +42,13 @@ public class UserRepositoryTests {
     @BeforeEach
     void setUp() {
         user1 = User.builder()
-                .nickname("Bob")
+                .nickname("Bobby")
                 .email("bob@example.com")
                 .password("encoded-password-1")
                 .contributionPoints(50L)
                 .createdAt(OffsetDateTime.now())
+                .role(Role.USER)
+                .banned(false)
                 .build();
 
         user2 = User.builder()
@@ -47,6 +57,8 @@ public class UserRepositoryTests {
                 .password("encoded-password-1")
                 .contributionPoints(100L)
                 .createdAt(OffsetDateTime.now())
+                .role(Role.USER)
+                .banned(false)
                 .build();
 
         user1 = testEntityManager.persistAndFlush(user1);
@@ -61,12 +73,12 @@ public class UserRepositoryTests {
 
     @Test
     void existsByNicknameAndIdNot_shouldReturnTrue_whenAnotherHasNickname() {
-        assertThat(userRepository.existsByNicknameAndIdNot("Alice", user1.getId())).isFalse();
+        assertThat(userRepository.existsByNicknameAndIdNot("Alice", user1.getId())).isTrue();
     }
 
     @Test
     void existsByNickname_shouldReturnTrue_whenAUserWithNicknameExists() {
-        assertTrue(userRepository.existsByNickname("Bob"));
+        assertTrue(userRepository.existsByNickname("Bobby"));
     }
 
     @Test
@@ -81,12 +93,12 @@ public class UserRepositoryTests {
 
     @Test
     void existsByEmail_shouldReturnFalse_whenEmailDoesNotExist() {
-        assertTrue(userRepository.existsByEmail("charlie@example.com"));
+        assertFalse(userRepository.existsByEmail("charlie@example.com"));
     }
 
     @Test
     void findByEmail_shouldReturnEmpty_whenEmailDoesNotExist() {
-        assertThat(userRepository.findByEmail("bob@example.com")).isEmpty();
+        assertThat(userRepository.findByEmail("charlie@example.com")).isEmpty();
     }
 
     @Test
@@ -95,6 +107,6 @@ public class UserRepositoryTests {
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getNickname()).isEqualTo("Alice");
-        assertThat(result.get(1).getNickname()).isEqualTo("Bob");
+        assertThat(result.get(1).getNickname()).isEqualTo("Bobby");
     }
 }
