@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -34,6 +35,9 @@ public class UserServiceTests {
     @InjectMocks
     private UserService userService;
 
+    private static final String OLD_PASSWORD_HASH = "hashed-old-password";
+    private static final String NEW_PASSWORD_HASH = "hashed-new-password";
+
     private UUID userId;
     private User mockUser;
 
@@ -44,7 +48,7 @@ public class UserServiceTests {
                 .id(userId)
                 .nickname("TestUser")
                 .email("test@example.com")
-                .password("hashed-old-password")
+                .password(OLD_PASSWORD_HASH)
                 .role(Role.USER)
                 .contributionPoints(10L)
                 .createdAt(OffsetDateTime.now())
@@ -55,16 +59,14 @@ public class UserServiceTests {
     @Nested
     class GetUsers{
 
-        private UUID userId;
         private User user1;
 
         private User user2;
 
         @BeforeEach
         void setUpThreeUsers(){
-            userId = UUID.randomUUID();
             user1 = User.builder()
-                    .id(userId)
+                    .id(UUID.randomUUID())
                     .nickname("user1")
                     .role(Role.USER)
                     .contributionPoints(19L)
@@ -88,31 +90,37 @@ public class UserServiceTests {
             List<UserResponseDto> result = userService.getAllUsers();
 
             assertEquals(2, result.size());
-            assertEquals("user1", result.get(0).getNickname());
+            assertEquals(user1.getNickname(), result.get(0).getNickname());
+            assertEquals(user2.getNickname(), result.get(1).getNickname());
             verify(userRepository).findAll();
         }
 
         @Test
         void sortByContributionPoints_shouldReturnMappedDtoList(){
-            when(userRepository.findAllByOrderByContributionPointsDesc()).thenReturn(List.of(user1, user2));
+            when(userRepository.findAllByOrderByContributionPointsDesc()).thenReturn(List.of(user2, user1));
 
             List<UserResponseDto> result = userService.sortByContributionPoints();
 
             assertEquals(2, result.size());
-            assertEquals("user1", result.get(0).getNickname());
+            assertEquals(user2.getNickname(), result.get(0).getNickname());
+            assertEquals(user1.getNickname(), result.get(1).getNickname());
             verify(userRepository).findAllByOrderByContributionPointsDesc();
         }
 
 
         @Test
         void getUserById_shouldReturnDto_whenUserExists(){
-            when(userRepository.findById(userId)).thenReturn(Optional.of(user1));
+            when(userRepository.findById(user1.getId())).thenReturn(Optional.of(user1));
 
-            UserResponseDto result = userService.getUserById(userId);
+            UserResponseDto result = userService.getUserById(user1.getId());
 
             assertNotNull(result);
-            assertEquals(userId, result.getId());
-            verify(userRepository).findById(userId);
+            assertEquals(user1.getId(), result.getId());
+            assertEquals(user1.getNickname(), result.getNickname());
+            assertEquals(user1.getContributionPoints(), result.getContributionPoints());
+            assertEquals(user1.getCreatedAt(), result.getCreatedAt());
+            assertEquals(user1.getRole(), result.getRole());
+            verify(userRepository).findById(user1.getId());
         }
 
         @Test
@@ -138,9 +146,9 @@ public class UserServiceTests {
         @Test
         void createUserAsAdmin_shouldSucceed_whenEmailAndNicknameDoesNotExist() {
             UUID generatedId = UUID.randomUUID();
-            when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
-            when(userRepository.existsByNickname("testUser")).thenReturn(false);
-            when(passwordEncoder.encode("rawPassword123")).thenReturn("hashed-new-password");
+            when(userRepository.existsByEmail(dto.getEmail())).thenReturn(false);
+            when(userRepository.existsByNickname(dto.getNickname())).thenReturn(false);
+            when(passwordEncoder.encode(dto.getPassword())).thenReturn(NEW_PASSWORD_HASH);
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
                 User userToSave = invocation.getArgument(0);
                 userToSave.setId(generatedId);
@@ -150,33 +158,43 @@ public class UserServiceTests {
             UserResponseDto response = userService.createUserAsAdmin(dto);
 
             assertNotNull(response);
-            verify(userRepository).existsByEmail("test@example.com");
-            verify(userRepository).existsByNickname("testUser");
-            verify(passwordEncoder).encode("rawPassword123");
-            verify(userRepository).save(any(User.class));
+            assertEquals(generatedId, response.getId());
+            verify(userRepository).existsByEmail(dto.getEmail());
+            verify(userRepository).existsByNickname(dto.getNickname());
+            verify(passwordEncoder).encode(dto.getPassword());
+
+            ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+            verify(userRepository).save(captor.capture());
+            User saved = captor.getValue();
+            assertEquals(dto.getNickname(), saved.getNickname());
+            assertEquals(dto.getEmail(), saved.getEmail());
+            assertEquals(dto.getRole(), saved.getRole());
+            assertEquals(NEW_PASSWORD_HASH, saved.getPassword());
+            assertNotEquals(dto.getPassword(), saved.getPassword());
+            assertEquals(0L, saved.getContributionPoints());
         }
 
         @Test
-        void createUserAsAdmin_shouldThrow_whenEmailDoesNotExist() {
-            when(userRepository.existsByEmail("test@example.com")).thenReturn(true);
+        void createUserAsAdmin_shouldThrow_whenEmailAlreadyExists() {
+            when(userRepository.existsByEmail(dto.getEmail())).thenReturn(true);
 
             assertThrows(IllegalStateException.class, () -> userService.createUserAsAdmin(dto));
 
-            verify(userRepository).existsByEmail("test@example.com");
+            verify(userRepository).existsByEmail(dto.getEmail());
             verify(userRepository, never()).save(any(User.class));
             verify(userRepository, never()).existsByNickname(anyString());
             verifyNoInteractions(passwordEncoder);
         }
 
         @Test
-        void createUserAsAdmin_shouldThrow_whenNicknameDoesNotExist() {
-            when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
-            when(userRepository.existsByNickname("testUser")).thenReturn(true);
+        void createUserAsAdmin_shouldThrow_whenNicknameAlreadyExists() {
+            when(userRepository.existsByEmail(dto.getEmail())).thenReturn(false);
+            when(userRepository.existsByNickname(dto.getNickname())).thenReturn(true);
 
             assertThrows(IllegalStateException.class, () -> userService.createUserAsAdmin(dto));
 
-            verify(userRepository).existsByEmail("test@example.com");
-            verify(userRepository).existsByNickname("testUser");
+            verify(userRepository).existsByEmail(dto.getEmail());
+            verify(userRepository).existsByNickname(dto.getNickname());
             verify(userRepository, never()).save(any(User.class));
             verifyNoInteractions(passwordEncoder);
         }
@@ -214,21 +232,34 @@ public class UserServiceTests {
         void updateNickname_shouldSucceed_whenUpdatedNicknameIsAvailable() {
             UserUpdateDto dto = new UserUpdateDto("updated-nickname");
             when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
-            when(userRepository.existsByNicknameAndIdNot("updated-nickname", userId)).thenReturn(false);
+            when(userRepository.existsByNicknameAndIdNot(dto.getNickname(), userId)).thenReturn(false);
 
             UserResponseDto result = userService.updateNicknameById(userId, dto);
 
-            assertEquals("updated-nickname", result.getNickname());
-
+            assertEquals(dto.getNickname(), result.getNickname());
+            assertEquals(dto.getNickname(), mockUser.getNickname());
         }
 
         @Test
         void updateNickname_shouldThrow_whenUpdatedNicknameIsTaken() {
             UserUpdateDto dto = new UserUpdateDto("updated-nickname");
             when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
-            when(userRepository.existsByNicknameAndIdNot("updated-nickname", userId)).thenReturn(true);
+            when(userRepository.existsByNicknameAndIdNot(dto.getNickname(), userId)).thenReturn(true);
 
             assertThrows(IllegalArgumentException.class, () -> userService.updateNicknameById(userId, dto));
+
+            assertEquals("TestUser", mockUser.getNickname());
+        }
+
+        @Test
+        void updateNickname_shouldThrow_whenUserDoesNotExist() {
+            UserUpdateDto dto = new UserUpdateDto("updated-nickname");
+            when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+            assertThrows(EntityNotFoundException.class, () -> userService.updateNicknameById(userId, dto));
+
+            verify(userRepository).findById(userId);
+            verify(userRepository, never()).existsByNicknameAndIdNot(any(), any());
         }
     }
 
@@ -238,16 +269,29 @@ public class UserServiceTests {
         void changePassword_shouldSucceed_whenCurrentPasswordIsCorrect() {
             ChangePasswordDto dto = new ChangePasswordDto("correct-password", "new-password");
             when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
-            when(passwordEncoder.matches("correct-password", "hashed-old-password")).thenReturn(true);
-            when(passwordEncoder.matches("new-password", "hashed-old-password")).thenReturn(false);
-            when(passwordEncoder.encode("new-password")).thenReturn("hashed-new-password");
+            when(passwordEncoder.matches(dto.getCurrentPassword(), OLD_PASSWORD_HASH)).thenReturn(true);
+            when(passwordEncoder.matches(dto.getNewPassword(), OLD_PASSWORD_HASH)).thenReturn(false);
+            when(passwordEncoder.encode(dto.getNewPassword())).thenReturn(NEW_PASSWORD_HASH);
             when(userRepository.save(any(User.class))).thenReturn(mockUser);
 
             UserResponseDto response = userService.changePassword(userId, dto);
 
-            assertEquals("hashed-new-password", mockUser.getPassword());
+            assertEquals(NEW_PASSWORD_HASH, mockUser.getPassword());
             verify(userRepository).save(mockUser);
             assertNotNull(response);
+        }
+
+
+        @Test
+        void changePassword_shouldThrow_whenUserDoesNotExist() {
+            ChangePasswordDto dto = new ChangePasswordDto("current-password", "new-password");
+            when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+            assertThrows(EntityNotFoundException.class, () -> userService.changePassword(userId, dto));
+
+            verify(userRepository).findById(userId);
+            verifyNoInteractions(passwordEncoder);
+            verify(userRepository, never()).save(any());
         }
 
 
@@ -255,10 +299,11 @@ public class UserServiceTests {
         void changePassword_shouldThrow_WhenCurrentPasswordIsWrong(){
             ChangePasswordDto dto = new ChangePasswordDto("wrong-password", "new-password");
             when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
-            when(passwordEncoder.matches("wrong-password", "hashed-old-password")).thenReturn(false);
+            when(passwordEncoder.matches(dto.getCurrentPassword(), OLD_PASSWORD_HASH)).thenReturn(false);
 
             assertThrows(BadCredentialsException.class, () -> userService.changePassword(userId, dto));
 
+            assertEquals(OLD_PASSWORD_HASH, mockUser.getPassword());
             verify(userRepository, never()).save(mockUser);
         }
 
@@ -267,10 +312,12 @@ public class UserServiceTests {
         void changePassword_shouldThrow_whenNewPasswordSameAsCurrent() {
             ChangePasswordDto dto = new ChangePasswordDto("current-password", "current-password");
             when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
-            when(passwordEncoder.matches("current-password", "hashed-old-password")).thenReturn(true);
+            when(passwordEncoder.matches(dto.getCurrentPassword(), OLD_PASSWORD_HASH)).thenReturn(true);
 
             assertThrows(IllegalStateException.class, () -> userService.changePassword(userId, dto));
 
+            assertEquals(OLD_PASSWORD_HASH, mockUser.getPassword());
+            verify(passwordEncoder, never()).encode(anyString());
             verify(userRepository, never()).save(any());
         }
     }
@@ -290,6 +337,24 @@ public class UserServiceTests {
             when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
             userService.unBanUser(userId);
             assertFalse(mockUser.isBanned());
+        }
+
+        @Test
+        void banUser_shouldThrow_whenUserDoesNotExist() {
+            when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+            assertThrows(EntityNotFoundException.class, () -> userService.banUser(userId));
+
+            verify(userRepository).findById(userId);
+        }
+
+        @Test
+        void unBanUser_shouldThrow_whenUserDoesNotExist() {
+            when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+            assertThrows(EntityNotFoundException.class, () -> userService.unBanUser(userId));
+
+            verify(userRepository).findById(userId);
         }
     }
 
