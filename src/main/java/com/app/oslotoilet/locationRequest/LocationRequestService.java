@@ -98,22 +98,20 @@ public class LocationRequestService {
         if (newStatus == RequestStatus.APPROVED){
             User user = request.getUser();
             user.setContributionPoints(user.getContributionPoints() + ContributionPoints.APPROVED.getValue());
+            ToiletRequestDto newToilet = ToiletRequestDto.builder()
+                    .name(request.getName())
+                    .latitude(request.getLatitude())
+                    .longitude(request.getLongitude())
+                    .hasFee(request.isHasFee())
+                    .fee(request.getFee())
+                    .description(request.getDescription())
+                    .hasConditions(false)
+                    .isSeasonal(false)
+                    .isClosed(false)
+                    .build();
+
+            toiletService.createToilet(newToilet);
         }
-
-        ToiletRequestDto newToilet = ToiletRequestDto.builder()
-                .name(request.getName())
-                .latitude(request.getLatitude())
-                .longitude(request.getLongitude())
-                .hasFee(request.isHasFee())
-                .fee(request.getFee())
-                .description(request.getDescription())
-                .hasConditions(false)
-                .isSeasonal(false)
-                .isClosed(false)
-                .build();
-
-        toiletService.createToilet(newToilet);
-
         return mapToResponseDto(request);
     }
 
