@@ -28,7 +28,6 @@ public class ToiletRequestDto {
 
     private boolean hasFee;
 
-    @NotNull(message = "Fee amount is required")
     @DecimalMin("0.0")
     private BigDecimal fee;
 
