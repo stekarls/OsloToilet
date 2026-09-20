@@ -31,27 +31,6 @@ public class PaymentOptionService {
                 .orElseThrow(() -> new EntityNotFoundException("Payment option not found with paymentOptionId: " + paymentOptionId));
     }
 
-    @Transactional
-    public PaymentOptionResponseDto createPaymentOption(PaymentOptionRequestDto dto){
-        if (paymentOptionRepository.existsByCode(dto.getCode())) {
-            throw new IllegalStateException("Payment option already exists: " + dto.getCode());
-        }
-
-        PaymentOption paymentOption = PaymentOption.builder()
-                .code(dto.getCode())
-                .build();
-
-        return mapToResponseDto(paymentOptionRepository.save(paymentOption));
-    }
-
-    @Transactional
-    public void deletePaymentOption(UUID paymentOptionId){
-        if (!paymentOptionRepository.existsById(paymentOptionId)){
-            throw new EntityNotFoundException("Payment option not found with paymentOptionId: " + paymentOptionId);
-        }
-        paymentOptionRepository.deleteById(paymentOptionId);
-    }
-
     private PaymentOptionResponseDto mapToResponseDto(PaymentOption paymentOption){
         return PaymentOptionResponseDto.builder()
                 .id(paymentOption.getId())
