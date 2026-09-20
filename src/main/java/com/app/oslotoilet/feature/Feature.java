@@ -19,7 +19,6 @@ import java.util.UUID;
 @Table(name = "features")
 public class Feature {
 
-    //TODO: featurecode should be unique, add unique constraint
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

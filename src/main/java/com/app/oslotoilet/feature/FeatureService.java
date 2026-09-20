@@ -1,6 +1,5 @@
 package com.app.oslotoilet.feature;
 
-import com.app.oslotoilet.enums.FeatureCode;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,45 +27,11 @@ public class FeatureService {
     }
 
     @Transactional
-    public FeatureResponseDto createFeature(FeatureRequestDto featureRequestDto){
-        FeatureCode featureCode = featureRequestDto.getFeatureCode();
-        boolean exists = featureRepository.existsByFeatureCode(featureCode);
-
-        if (exists){
-            throw new IllegalArgumentException("Feature with code " + featureCode + " already exists.");
-        }
-
-        Feature newFeature = Feature.builder()
-                .featureCode(featureCode)
-                .description(featureRequestDto.getDescription())
-                .build();
-
-        return mapToResponseDto(featureRepository.save(newFeature));
-    }
-
-    @Transactional
-    public void deleteFeature(UUID featureId){
-        if (!featureRepository.existsById(featureId)){
-            throw new EntityNotFoundException("Feature not found with id: " + featureId);
-        }
-        featureRepository.deleteById(featureId);
-    }
-
-    @Transactional
     public FeatureResponseDto updateFeature( UUID featureId, FeatureUpdateDto featureUpdateDto){
         Feature feature = featureRepository.findById(featureId)
                 .orElseThrow(() -> new EntityNotFoundException("Feature not found with id: " + featureId));
 
-        if (featureUpdateDto.getFeatureCode() != null) {
-
-            if (!feature.getFeatureCode().equals(featureUpdateDto.getFeatureCode()) && featureRepository.existsByFeatureCode(featureUpdateDto.getFeatureCode())) {
-                throw new IllegalArgumentException("Feature code " + featureUpdateDto.getFeatureCode() + " already exists.");
-            }
-            feature.setFeatureCode(featureUpdateDto.getFeatureCode());
-        }
-        if (featureUpdateDto.getDescription() != null) {
-            feature.setDescription(featureUpdateDto.getDescription());
-        }
+        feature.setDescription(featureUpdateDto.getDescription());
 
         return mapToResponseDto(featureRepository.save(feature));
     }
