@@ -79,6 +79,8 @@ public class LocationRequestService {
         locationRequestRepository.deleteById(locationRequestId);
     }
 
+    //TODO: Need update for admin to update fields if needed before approval.
+
     @Transactional
     public LocationRequestResponseDto approveRequestStatus(UUID locationRequestId, RequestStatus newStatus, String adminComment){
 
@@ -118,7 +120,7 @@ public class LocationRequestService {
 
 
     private LocationRequest mapToEntity(LocationRequestDto locationRequestDto, User user){
-        BigDecimal fee = locationRequestDto.isHasFee() ? locationRequestDto.getFee() : BigDecimal.valueOf(0);
+        BigDecimal fee = locationRequestDto.isHasFee() ? locationRequestDto.getFee() : null;
         return LocationRequest.builder()
                 .user(user)
                 .name(locationRequestDto.getName())
