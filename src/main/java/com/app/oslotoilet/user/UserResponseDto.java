@@ -1,5 +1,6 @@
 package com.app.oslotoilet.user;
 
+import com.app.oslotoilet.enums.Role;
 import lombok.*;
 
 import java.time.OffsetDateTime;
@@ -15,4 +16,5 @@ public class UserResponseDto {
     private String nickname;
     private OffsetDateTime createdAt;
     private Long contributionPoints;
+    private Role role;
 }

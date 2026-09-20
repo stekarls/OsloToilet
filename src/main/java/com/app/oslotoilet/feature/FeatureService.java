@@ -57,8 +57,16 @@ public class FeatureService {
         Feature feature = featureRepository.findById(featureId)
                 .orElseThrow(() -> new EntityNotFoundException("Feature not found with id: " + featureId));
 
-        if (featureUpdateDto.getDescription() != null) {feature.setDescription(featureUpdateDto.getDescription());}
-        if (featureUpdateDto.getFeatureCode() != null) {feature.setFeatureCode(featureUpdateDto.getFeatureCode());}
+        if (featureUpdateDto.getFeatureCode() != null) {
+
+            if (!feature.getFeatureCode().equals(featureUpdateDto.getFeatureCode()) && featureRepository.existsByFeatureCode(featureUpdateDto.getFeatureCode())) {
+                throw new IllegalArgumentException("Feature code " + featureUpdateDto.getFeatureCode() + " already exists.");
+            }
+            feature.setFeatureCode(featureUpdateDto.getFeatureCode());
+        }
+        if (featureUpdateDto.getDescription() != null) {
+            feature.setDescription(featureUpdateDto.getDescription());
+        }
 
         return mapToResponseDto(featureRepository.save(feature));
     }

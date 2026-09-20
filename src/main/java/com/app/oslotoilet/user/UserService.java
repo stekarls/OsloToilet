@@ -112,6 +112,7 @@ public class UserService {
                 .nickname(user.getNickname())
                 .contributionPoints(user.getContributionPoints())
                 .createdAt(user.getCreatedAt())
+                .role(user.getRole())
                 .build();
     }
 
