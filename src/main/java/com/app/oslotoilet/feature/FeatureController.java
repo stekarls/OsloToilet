@@ -1,7 +1,6 @@
 package com.app.oslotoilet.feature;
 
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,21 +29,8 @@ public class FeatureController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping
-    public ResponseEntity<FeatureResponseDto> createFeature(@RequestBody @Valid FeatureRequestDto featureRequestDto){
-        return new ResponseEntity<>(featureService.createFeature(featureRequestDto), HttpStatus.CREATED);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{featureId}")
     public ResponseEntity<FeatureResponseDto> updateFeature(@PathVariable UUID featureId, @RequestBody @Valid FeatureUpdateDto featureUpdateDto){
         return ResponseEntity.ok(featureService.updateFeature(featureId, featureUpdateDto));
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{featureId}")
-    public ResponseEntity<Void> deleteFeature(@PathVariable UUID featureId){
-        featureService.deleteFeature(featureId);
-        return ResponseEntity.noContent().build();
     }
 }
