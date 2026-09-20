@@ -31,16 +31,16 @@ public class ErrorReportService {
         this.toiletRepository = toiletRepository;
     }
 
-    public List<ErrorReportRequestDto> getErrorReports(){
+    public List<ErrorReportResponseDto> getErrorReports(){
         return errorReportRepository.findAll().stream().map(this::mapToResponseDto).toList();
     }
 
-    public List<ErrorReportRequestDto> getByRequestStatus(RequestStatus status){
+    public List<ErrorReportResponseDto> getByRequestStatus(RequestStatus status){
         return errorReportRepository.findByStatus(status).stream().map(this::mapToResponseDto).toList();
     }
 
     @Transactional
-    public ErrorReportRequestDto createErrorReport(ErrorReportRequestDto errorReportRequestDto){
+    public ErrorReportResponseDto createErrorReport(ErrorReportRequestDto errorReportRequestDto){
         User user = userRepository.findById(errorReportRequestDto.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + errorReportRequestDto.getUserId()));
         Toilet toilet = toiletRepository.findById(errorReportRequestDto.getToiletID()).orElseThrow(() -> new EntityNotFoundException("Toilet not found with ID: " + errorReportRequestDto.getToiletID()));
 
@@ -64,15 +64,15 @@ public class ErrorReportService {
     }
 
     @Transactional
-    public ErrorReportRequestDto changeStatus(UUID reportId, RequestStatus status, String adminComment){
+    public ErrorReportResponseDto changeStatus(UUID reportId, RequestStatus status, String adminComment){
         ErrorReport errorReport = errorReportRepository.findById(reportId).orElseThrow(() -> new EntityNotFoundException("Error report not found with ID: " + reportId));
 
         if (adminComment != null){
             errorReport.setAdminComment(adminComment);
         }
-
-        errorReport.setStatus(status);
-        //TODO: find better way of updating the updated field
+        if(status != null){
+            errorReport.setStatus(status);
+        }
         errorReport.setUpdated(OffsetDateTime.now());
 
         return mapToResponseDto(errorReport);
@@ -93,11 +93,16 @@ public class ErrorReportService {
                 .build();
     }
 
-    private ErrorReportRequestDto mapToResponseDto(ErrorReport errorReport){
-        return ErrorReportRequestDto.builder()
-                .toiletID(errorReport.getToilet().getId())
+    private ErrorReportResponseDto mapToResponseDto(ErrorReport errorReport){
+        return ErrorReportResponseDto.builder()
+                .id(errorReport.getId())
+                .toiletId(errorReport.getToilet().getId())
                 .userId(errorReport.getUser().getId())
                 .description(errorReport.getDescription())
+                .created(errorReport.getCreated())
+                .updated(errorReport.getUpdated())
+                .adminComment(errorReport.getAdminComment())
+                .status(errorReport.getStatus())
                 .build();
 
     }
