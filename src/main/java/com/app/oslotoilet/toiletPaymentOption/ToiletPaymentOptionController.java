@@ -46,9 +46,9 @@ public class ToiletPaymentOptionController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/{toiletId}/payment-options/{toiletPaymentId}/verify")
-    public ResponseEntity<ToiletPaymentOptionResponseDto> verifyPaymentOption(@PathVariable UUID toiletId, @PathVariable UUID toiletPaymentId){
-        return ResponseEntity.ok(toiletPaymentService.verifyPaymentOption(toiletId, toiletPaymentId));
+    @PatchMapping("/{toiletId}/payment-options/{toiletPaymentOptionId}/verify")
+    public ResponseEntity<ToiletPaymentOptionResponseDto> verifyPaymentOption(@PathVariable UUID toiletId, @PathVariable UUID toiletPaymentOptionId){
+        return ResponseEntity.ok(toiletPaymentService.verifyPaymentOption(toiletId, toiletPaymentOptionId));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

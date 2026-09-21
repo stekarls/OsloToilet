@@ -67,14 +67,14 @@ public class ErrorReportService {
     }
 
     @Transactional
-    public ErrorReportResponseDto changeStatus(UUID reportId, RequestStatus status, String adminComment){
+    public ErrorReportResponseDto changeStatus(UUID reportId, ErrorReportUpdateDto dto){
         ErrorReport errorReport = errorReportRepository.findById(reportId).orElseThrow(() -> new EntityNotFoundException("Error report not found with ID: " + reportId));
 
-        if (adminComment != null){
-            errorReport.setAdminComment(adminComment);
+        if (dto.getAdminComment() != null){
+            errorReport.setAdminComment(dto.getAdminComment());
         }
-        if(status != null){
-            errorReport.setStatus(status);
+        if(dto.getStatus() != null){
+            errorReport.setStatus(dto.getStatus());
         }
         errorReport.setUpdated(OffsetDateTime.now());
 

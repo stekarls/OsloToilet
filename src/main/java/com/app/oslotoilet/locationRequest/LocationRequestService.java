@@ -92,7 +92,7 @@ public class LocationRequestService {
     //TODO: Need update for admin to update fields if needed before approval.
 
     @Transactional
-    public LocationRequestResponseDto approveRequestStatus(UUID locationRequestId, RequestStatus newStatus, String adminComment){
+    public LocationRequestResponseDto updateRequestStatus(UUID locationRequestId, LocationRequestUpdateDto dto){
 
         LocationRequest request = locationRequestRepository.findById(locationRequestId).orElseThrow(() ->
                 new EntityNotFoundException("Location Request not found with ID: " + locationRequestId));
@@ -101,11 +101,15 @@ public class LocationRequestService {
             throw new IllegalStateException("Cannot modify a location request that has already been approved");
         }
 
-        if(adminComment != null){
-            request.setAdminComment(adminComment);
+        if(dto.getAdminComment() != null){
+            request.setAdminComment(dto.getAdminComment());
         }
 
-        request.setRequestStatus(newStatus);
+        RequestStatus newStatus = dto.getRequestStatus();
+
+        if (newStatus != null){
+            request.setRequestStatus(newStatus);
+        }
 
         if (newStatus == RequestStatus.APPROVED){
             User user = request.getUser();

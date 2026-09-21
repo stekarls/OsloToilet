@@ -68,7 +68,7 @@ async function fetchUsers(){
 }
 
 async function fetchFeatures(){
-    const response = await fetch("/api/v1/feature");
+    const response = await fetch("/api/v1/features");
     if (!response.ok){
         console.error("Error: " + response.statusText);
     }
@@ -97,7 +97,7 @@ async function fetchFeatures(){
 }
 
 async function fetchToilets(){
-    const response = await fetch("/api/v1/toilet");
+    const response = await fetch("/api/v1/toilets");
     if (!response.ok){
         console.error("Error: " + response.statusText);
     }
@@ -134,7 +134,7 @@ async function fetchToilets(){
 }
 
 async function fetchRequests() {
-    const response = await fetch("/api/v1/contribution");
+    const response = await fetch("/api/v1/location-requests");
     if (!response.ok) {
         console.error("Error: " + response.statusText);
     }
@@ -231,7 +231,7 @@ function myMap(lat, lng) {
 
 async function showToilet(id) {
     try {
-        const response = await fetch(`/api/v1/toilet/${id}`);
+        const response = await fetch(`/api/v1/toilets/${id}`);
         if (!response.ok) throw new Error(response.statusText);
 
         const data = await response.json();
