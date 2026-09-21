@@ -22,7 +22,7 @@ OsloToilet lets users find public toilets, see their features (wheelchair access
 
 | Layer       | Technology                   |
 | ----------- | ---------------------------- |
-| Language    | Java 22                      |
+| Language    | Java 17                      |
 | Framework   | Spring Boot 4                |
 | Security    | Spring Security + JWT (jjwt) |
 | Persistence | Spring Data JPA / Hibernate  |
@@ -37,8 +37,8 @@ The project follows a layered architecture, with each resource organized as its 
 ```
 com.app.oslotoilet
 ├── auth/                  # Registration, login, JWT issuance
-├── security/              # JwtService, JwtAuthFilter, UserPrincipal
-├── config/                # SecurityConfig and other Spring configuration
+├── security/              # SecurityConfig, JwtService, JwtAuthFilter, SecurityUser
+├── enums/                 # Role, RequestStatus, FeatureCode, PaymentCode, SourceType
 ├── exception/             # Global exception handling
 ├── user/                  # User management
 ├── toilet/                # Core toilet resource
@@ -71,7 +71,12 @@ Authentication is handled via **stateless JWT** — no server-side sessions. Tok
 | `MODERATOR` | Everything a `USER` can, plus verify contributed features/payment options |
 | `ADMIN` | Full control — create/delete toilets, manage reference data, approve location requests, manage users |
 
-Access control is enforced with `@PreAuthorize`, combining role checks (`hasRole(...)`) with ownership checks (e.g. a user can only edit their own profile or delete their own review).
+Access control is enforced in two complementary ways:
+
+- **`@PreAuthorize`** on controller methods, combining role checks (`hasRole(...)`) with ownership checks in SpEL (e.g. `#id == authentication.principal.user.id`, so a user can only read or edit their own profile).
+- **Service-level ownership checks** where ownership can only be determined after loading the record — deleting a review, an error report or a location request, and reading a single location request.
+
+Resources are always created for the authenticated caller: `POST` bodies carry no user id, and the owner is taken from the JWT principal. It is therefore not possible to submit a review, an error report or a location request on another user's behalf.
 
 ## Getting Started
 
@@ -106,14 +111,19 @@ The API will be available at `http://localhost:8080`.
 
 ## API Overview
 
-| Resource        | Base path                 |
-| --------------- | ------------------------- |
-| Auth            | `/api/v1/auth`            |
-| Users           | `/api/v1/users`           |
-| Toilets         | `/api/v1/toilets`         |
-| Features        | `/api/v1/features`        |
-| Payment options | `/api/v1/payment-options` |
-| Reviews         | `/api/v1/reviews`         |
+| Resource                | Base path                                     |
+| ----------------------- | --------------------------------------------- |
+| Auth                    | `/api/v1/auth`                                |
+| Users                   | `/api/v1/users`                               |
+| Toilets                 | `/api/v1/toilets`                             |
+| Opening hours           | `/api/v1/toilets/{toiletId}/opening-hours`    |
+| Toilet features         | `/api/v1/toilets/{toiletId}/features`         |
+| Toilet payment options  | `/api/v1/toilets/{toiletId}/payment-options`  |
+| Features (reference)    | `/api/v1/features`                            |
+| Payment options (ref.)  | `/api/v1/payment-options`                     |
+| Reviews                 | `/api/v1/reviews`                             |
+| Error reports           | `/api/v1/error-reports`                       |
+| Location requests       | `/api/v1/location-requests`                   |
 
 Example: register and get a token
 
@@ -133,6 +143,21 @@ Then include the returned token on subsequent requests:
 ```
 Authorization: Bearer <token>
 ```
+
+Example: an admin approves a location request, which creates the toilet
+
+```http
+PATCH /api/v1/location-requests/{id}
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "requestStatus": "APPROVED",
+  "adminComment": "Verified on site"
+}
+```
+
+Both fields are optional — omitting one leaves the current value untouched. Error reports are updated the same way via `PATCH /api/v1/error-reports/{id}` with `status` and `adminComment`.
 
 ## Roadmap
 
