@@ -33,8 +33,8 @@ public class ErrorReportController {
     }
 
     @PostMapping()
-    public ResponseEntity<ErrorReportResponseDto> createErrorReport(@RequestBody @Valid ErrorReportRequestDto errorReportRequestDto){
-        ErrorReportResponseDto report = errorReportService.createErrorReport(errorReportRequestDto);
+    public ResponseEntity<ErrorReportResponseDto> createErrorReport(@RequestBody @Valid ErrorReportRequestDto errorReportRequestDto, @AuthenticationPrincipal SecurityUser currentUser){
+        ErrorReportResponseDto report = errorReportService.createErrorReport(errorReportRequestDto, currentUser);
         return new ResponseEntity<>(report, HttpStatus.CREATED);
 
     }

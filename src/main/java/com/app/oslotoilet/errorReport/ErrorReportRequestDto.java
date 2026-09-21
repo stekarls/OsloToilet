@@ -16,8 +16,6 @@ import java.util.UUID;
 public class ErrorReportRequestDto {
     @NotNull(message = "Toilet ID is required")
     private UUID toiletID;
-    @NotNull(message = "User ID is required")
-    private UUID userId;
     @NotBlank
     @Size(min = 5, max = 1000, message = "Description must be between 5 and 1000 characters")
     private String description;

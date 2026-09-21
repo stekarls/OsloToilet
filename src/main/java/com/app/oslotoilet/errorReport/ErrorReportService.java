@@ -40,8 +40,11 @@ public class ErrorReportService {
     }
 
     @Transactional
-    public ErrorReportResponseDto createErrorReport(ErrorReportRequestDto errorReportRequestDto){
-        User user = userRepository.findById(errorReportRequestDto.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + errorReportRequestDto.getUserId()));
+    public ErrorReportResponseDto createErrorReport(ErrorReportRequestDto errorReportRequestDto, SecurityUser currentUser){
+
+        UUID userId = currentUser.getUser().getId();
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
         Toilet toilet = toiletRepository.findById(errorReportRequestDto.getToiletID()).orElseThrow(() -> new EntityNotFoundException("Toilet not found with ID: " + errorReportRequestDto.getToiletID()));
 
         ErrorReport errorReport = mapToEntity(errorReportRequestDto, user, toilet);

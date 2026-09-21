@@ -10,4 +10,5 @@ import java.util.UUID;
 public interface ReviewRepository extends JpaRepository<Review, UUID>{
     List<Review> findByToiletId(UUID id);
     List<Review> findByUserId(UUID id);
+    boolean existsByToiletIdAndUserId(UUID toiletId, UUID userId);
 }

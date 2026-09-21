@@ -34,6 +34,10 @@ public class ToiletService {
     public ToiletResponseDto createToilet(ToiletRequestDto dto){
         validateToiletState(dto.isAlwaysOpen(), dto.isClosed());
 
+        if (toiletRepository.existsByName(dto.getName())) {
+            throw new IllegalStateException("A toilet with the name '" + dto.getName() + "' already exists");
+        }
+
         Toilet toilet = toiletRepository.save(mapToEntity(dto));
         return mapToResponseDto(toilet);
 
@@ -46,7 +50,12 @@ public class ToiletService {
 
 
 
-        if (dto.getName() != null) toilet.setName(dto.getName());
+        if (dto.getName() != null) {
+            if (toiletRepository.existsByNameAndIdNot(dto.getName(), toiletId)) {
+                throw new IllegalStateException("A toilet with the name '" + dto.getName() + "' already exists");
+            }
+            toilet.setName(dto.getName());
+        }
         if (dto.getLatitude() != null) toilet.setLatitude(dto.getLatitude());
         if (dto.getLongitude() != null) toilet.setLongitude(dto.getLongitude());
         if (dto.getHasFee() != null) toilet.setHasFee(dto.getHasFee());

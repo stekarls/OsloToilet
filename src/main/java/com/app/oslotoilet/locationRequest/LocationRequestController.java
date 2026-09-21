@@ -34,11 +34,11 @@ public class LocationRequestController {
     }
 
     @GetMapping("/{requestId}")
-    public ResponseEntity<LocationRequestResponseDto> getByLocationRequestId(@PathVariable UUID requestId){
-        return ResponseEntity.ok(locationRequestService.getByLocationRequestId(requestId));
+    public ResponseEntity<LocationRequestResponseDto> getByLocationRequestId(@PathVariable UUID requestId, @AuthenticationPrincipal SecurityUser currentUser){
+        return ResponseEntity.ok(locationRequestService.getByLocationRequestId(requestId, currentUser));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.user.id")
     @GetMapping("/user/{userId}")
     public List<LocationRequestResponseDto> getRequestsByUser(@PathVariable UUID userId, @RequestParam(required = false) RequestStatus requestStatus){
         if (requestStatus != null){
@@ -48,8 +48,8 @@ public class LocationRequestController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<LocationRequestResponseDto> createNewLocationRequest(@Valid @RequestBody LocationRequestDto locationRequest){
-        LocationRequestResponseDto response = locationRequestService.createNewLocationRequest(locationRequest);
+    public ResponseEntity<LocationRequestResponseDto> createNewLocationRequest(@Valid @RequestBody LocationRequestDto locationRequest, @AuthenticationPrincipal SecurityUser currentUser){
+        LocationRequestResponseDto response = locationRequestService.createNewLocationRequest(locationRequest, currentUser);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 

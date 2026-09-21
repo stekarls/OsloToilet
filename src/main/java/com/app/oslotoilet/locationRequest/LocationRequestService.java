@@ -36,8 +36,15 @@ public class LocationRequestService {
         return locationRequestRepository.findAllWithUser().stream().map(this::mapToResponseDto).toList();
     }
 
-    public LocationRequestResponseDto getByLocationRequestId(UUID requestId){
+    public LocationRequestResponseDto getByLocationRequestId(UUID requestId, SecurityUser currentUser){
         LocationRequest locationRequest = locationRequestRepository.findById(requestId).orElseThrow(() -> new EntityNotFoundException("Location Request with id " + requestId + " not found"));
+
+        boolean isAdmin = currentUser.getUser().getRole() == Role.ADMIN;
+
+        if (!isAdmin && !locationRequest.getUser().getId().equals(currentUser.getUser().getId())) {
+            throw new AccessDeniedException("You are not authorized to view this location request");
+        }
+
         return mapToResponseDto(locationRequest);
     }
 
@@ -53,8 +60,11 @@ public class LocationRequestService {
         return locationRequestRepository.findByUserIdOrderByCreatedAtDesc(userId).stream().map(this::mapToResponseDto).toList();
     }
     @Transactional
-    public LocationRequestResponseDto createNewLocationRequest(LocationRequestDto locationRequest){
-        User user = userRepository.findById(locationRequest.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + locationRequest.getUserId()));
+    public LocationRequestResponseDto createNewLocationRequest(LocationRequestDto locationRequest, SecurityUser currentUser){
+        validateFee(locationRequest.getFee(), locationRequest.isHasFee());
+
+        UUID userId = currentUser.getUser().getId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
 
         LocationRequest request = mapToEntity(locationRequest, user);
         request = locationRequestRepository.save(request);
@@ -118,6 +128,11 @@ public class LocationRequestService {
     }
 
 
+    private void validateFee(BigDecimal fee, boolean hasFee){
+        if (hasFee && (fee == null || fee.compareTo(BigDecimal.ZERO) <= 0)) {
+            throw new IllegalStateException("Fee must be a value greater than 0 when hasFee is true");
+        }
+    }
 
     private LocationRequest mapToEntity(LocationRequestDto locationRequestDto, User user){
         BigDecimal fee = locationRequestDto.isHasFee() ? locationRequestDto.getFee() : null;
