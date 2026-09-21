@@ -20,8 +20,8 @@ public class ToiletController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ToiletResponseDto>>findAll(@RequestParam(required = false) String sort){
-        return new ResponseEntity<>(toiletService.findAll(sort), HttpStatus.OK);
+    public ResponseEntity<List<ToiletResponseDto>> findAll(@RequestParam(required = false) String sort){
+        return ResponseEntity.ok(toiletService.findAll(sort));
     }
 
     @GetMapping("/{id}")
@@ -30,16 +30,16 @@ public class ToiletController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<ToiletResponseDto> createToilet(@Valid @RequestBody ToiletRequestDto toiletRequestDto){
-        return new ResponseEntity<>(toiletService.createToilet(toiletRequestDto), HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toiletService.createToilet(toiletRequestDto));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteToilet(@PathVariable UUID id){
         toiletService.deleteToilet(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasRole('ADMIN')")

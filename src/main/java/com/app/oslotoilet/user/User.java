@@ -2,6 +2,9 @@ package com.app.oslotoilet.user;
 
 
 import com.app.oslotoilet.enums.Role;
+import com.app.oslotoilet.errorReport.ErrorReport;
+import com.app.oslotoilet.locationRequest.LocationRequest;
+import com.app.oslotoilet.review.Review;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -10,6 +13,8 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -55,5 +60,17 @@ public class User {
     @Column(name = "banned", nullable = false)
     @NotNull(message = "Banned status is required")
     private boolean banned;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Review> reviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ErrorReport> errorReports = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<LocationRequest> locationRequests = new ArrayList<>();
 
 }

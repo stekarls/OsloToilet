@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/error")
+@RequestMapping("/api/v1/error-reports")
 public class ErrorReportController {
 
     private final ErrorReportService errorReportService;
@@ -25,18 +25,17 @@ public class ErrorReportController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<List<ErrorReportRequestDto>> getErrorReports(@RequestParam(required = false)RequestStatus status){
+    public ResponseEntity<List<ErrorReportResponseDto>> getErrorReports(@RequestParam(required = false)RequestStatus status){
         if (status != null){
-            return new ResponseEntity<>(errorReportService.getByRequestStatus(status), HttpStatus.OK);
+            return ResponseEntity.ok(errorReportService.getByRequestStatus(status));
         }
-        return new ResponseEntity<>(errorReportService.getErrorReports(), HttpStatus.OK);
+        return ResponseEntity.ok(errorReportService.getErrorReports());
     }
 
-    @PostMapping()
-    public ResponseEntity<ErrorReportRequestDto> createErrorReport(@RequestBody @Valid ErrorReportRequestDto errorReportRequestDto){
-        ErrorReportRequestDto report = errorReportService.createErrorReport(errorReportRequestDto);
-        return new ResponseEntity<>(report, HttpStatus.CREATED);
-
+    @PostMapping
+    public ResponseEntity<ErrorReportResponseDto> createErrorReport(@RequestBody @Valid ErrorReportRequestDto errorReportRequestDto, @AuthenticationPrincipal SecurityUser currentUser){
+        ErrorReportResponseDto report = errorReportService.createErrorReport(errorReportRequestDto, currentUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(report);
     }
 
     @DeleteMapping("/{id}")
@@ -46,9 +45,9 @@ public class ErrorReportController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}")
-    public ResponseEntity<ErrorReportRequestDto> changeStatus(@PathVariable UUID id, @RequestParam RequestStatus status, @RequestParam(required = false) String adminComment){
-        ErrorReportRequestDto report = errorReportService.changeStatus(id, status, adminComment);
+    @PatchMapping("/{id}")
+    public ResponseEntity<ErrorReportResponseDto> changeStatus(@PathVariable UUID id, @RequestBody @Valid ErrorReportUpdateDto dto){
+        ErrorReportResponseDto report = errorReportService.changeStatus(id, dto);
         return ResponseEntity.ok(report);
     }
 

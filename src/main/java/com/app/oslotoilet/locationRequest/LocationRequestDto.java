@@ -35,4 +35,10 @@ public class LocationRequestDto {
 
     @DecimalMin(value = "0.0", inclusive = false, message = "Fee must be greater than 0")
     private BigDecimal fee;
+
+    @SuppressWarnings("unused")
+    @AssertTrue(message = "A fee amount greater than 0 is required when hasFee is true")
+    private boolean isFeeConsistent() {
+        return !hasFee || (fee != null && fee.compareTo(BigDecimal.ZERO) > 0);
+    }
 }

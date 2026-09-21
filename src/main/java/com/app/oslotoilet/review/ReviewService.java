@@ -48,11 +48,16 @@ public class ReviewService {
 
 
     @Transactional
-    public ReviewResponseDto createReview(ReviewRequestDto reviewRequestDto){
+    public ReviewResponseDto createReview(ReviewRequestDto reviewRequestDto, SecurityUser currentUser){
+
+        UUID userId = currentUser.getUser().getId();
+
+        if (reviewRepository.existsByToiletIdAndUserId(reviewRequestDto.getToiletId(), userId)) {
+            throw new IllegalStateException("You have already reviewed this toilet");
+        }
 
         Toilet toilet = toiletRepository.findById(reviewRequestDto.getToiletId()).orElseThrow(() -> new EntityNotFoundException("Toilet not found with id: " + reviewRequestDto.getToiletId()));
-        User user = userRepository.findById(reviewRequestDto.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + reviewRequestDto.getUserId()));
-
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
         Review review = mapToEntity(reviewRequestDto, user, toilet);
         review = reviewRepository.save(review);
@@ -63,7 +68,7 @@ public class ReviewService {
 
     @Transactional
     public void deleteReview(UUID reviewId, SecurityUser currentUser) {
-        boolean isAdmin = currentUser.getUser().getRole() == Role.ADMIN;
+        boolean isAdmin = currentUser.getUser().getRole().equals(Role.ADMIN);
 
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new EntityNotFoundException("Review not found with reviewId: " + reviewId));
 

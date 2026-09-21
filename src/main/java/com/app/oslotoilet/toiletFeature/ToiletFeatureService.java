@@ -120,9 +120,9 @@ public class ToiletFeatureService {
     }
 
     @Transactional
-    public void removeFeatureFromToilet(UUID toiletId, UUID featureId) {
-        ToiletFeature link = toiletFeatureRepository.findById(featureId)
-                .orElseThrow(() -> new EntityNotFoundException("Feature link not found with id: " + featureId));
+    public void removeFeatureFromToilet(UUID toiletId, UUID toiletFeatureId) {
+        ToiletFeature link = toiletFeatureRepository.findById(toiletFeatureId)
+                .orElseThrow(() -> new EntityNotFoundException("Toilet-feature link not found with id: " + toiletFeatureId));
 
         if (!link.getToilet().getId().equals(toiletId)) {
             throw new AccessDeniedException("Toilet-feature link does not belong to this toilet");

@@ -20,7 +20,7 @@ public class ToiletFeatureController {
 
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/toilet-feature")
+    @GetMapping("/features")
     public ResponseEntity<List<ToiletFeatureResponseDto>> getAllToiletFeatures() {
         List<ToiletFeatureResponseDto> features = toiletFeatureService.getAllToiletFeatures();
         return ResponseEntity.ok(features);
@@ -28,15 +28,15 @@ public class ToiletFeatureController {
 
 
     @GetMapping("/{toiletId}/features")
-    ResponseEntity<List<ToiletFeatureResponseDto>> getFeaturesForToilet(@PathVariable UUID toiletId) {
+    public ResponseEntity<List<ToiletFeatureResponseDto>> getFeaturesForToilet(@PathVariable UUID toiletId) {
         List<ToiletFeatureResponseDto> response = toiletFeatureService.getFeaturesForToilet(toiletId);
         return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/{toiletId}/features/{featureId}/verify")
-    public ResponseEntity<ToiletFeatureResponseDto> verifyToiletFeature(@PathVariable UUID featureId, @PathVariable UUID toiletId) {
-        return ResponseEntity.ok(toiletFeatureService.verifyFeature(toiletId, featureId));
+    @PatchMapping("/{toiletId}/features/{toiletFeatureId}/verify")
+    public ResponseEntity<ToiletFeatureResponseDto> verifyToiletFeature(@PathVariable UUID toiletId, @PathVariable UUID toiletFeatureId) {
+        return ResponseEntity.ok(toiletFeatureService.verifyFeature(toiletId, toiletFeatureId));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -54,9 +54,9 @@ public class ToiletFeatureController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{toiletId}/features/{featureId}")
-    public ResponseEntity<Void> removeFeatureFromToilet(@PathVariable UUID featureId, @PathVariable UUID toiletId) {
-        toiletFeatureService.removeFeatureFromToilet(toiletId, featureId);
+    @DeleteMapping("/{toiletId}/features/{toiletFeatureId}")
+    public ResponseEntity<Void> removeFeatureFromToilet(@PathVariable UUID toiletId, @PathVariable UUID toiletFeatureId) {
+        toiletFeatureService.removeFeatureFromToilet(toiletId, toiletFeatureId);
         return ResponseEntity.noContent().build();
     }
 }

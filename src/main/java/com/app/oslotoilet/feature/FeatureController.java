@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/feature")
+@RequestMapping("/api/v1/features")
 public class FeatureController {
 
     private final FeatureService featureService;

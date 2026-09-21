@@ -2,6 +2,7 @@ package com.app.oslotoilet.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -41,6 +42,11 @@ public class GlobalExceptionHandler{
                 .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
                 .collect(Collectors.joining(","));
         return buildResponse(HttpStatus.BAD_REQUEST, message, request);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> dataIntegrityViolationException(DataIntegrityViolationException ex, HttpServletRequest request){
+        return buildResponse(HttpStatus.CONFLICT, "The request conflicts with existing data", request);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

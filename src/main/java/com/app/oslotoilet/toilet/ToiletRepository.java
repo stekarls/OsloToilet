@@ -15,4 +15,6 @@ public interface ToiletRepository extends JpaRepository<Toilet, UUID> {
     List<Toilet> findAllByOrderByUpdatedAtDesc();
     List<Toilet> findAllByOrderByNameAsc();
     List<Toilet> findAllByOrderByNameDesc();
+    boolean existsByName(String name);
+    boolean existsByNameAndIdNot(String name, UUID id);
 }

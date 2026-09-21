@@ -36,8 +36,15 @@ public class LocationRequestService {
         return locationRequestRepository.findAllWithUser().stream().map(this::mapToResponseDto).toList();
     }
 
-    public LocationRequestResponseDto getByLocationRequestId(UUID requestId){
+    public LocationRequestResponseDto getByLocationRequestId(UUID requestId, SecurityUser currentUser){
         LocationRequest locationRequest = locationRequestRepository.findById(requestId).orElseThrow(() -> new EntityNotFoundException("Location Request with id " + requestId + " not found"));
+
+        boolean isAdmin = currentUser.getUser().getRole() == Role.ADMIN;
+
+        if (!isAdmin && !locationRequest.getUser().getId().equals(currentUser.getUser().getId())) {
+            throw new AccessDeniedException("You are not authorized to view this location request");
+        }
+
         return mapToResponseDto(locationRequest);
     }
 
@@ -53,8 +60,11 @@ public class LocationRequestService {
         return locationRequestRepository.findByUserIdOrderByCreatedAtDesc(userId).stream().map(this::mapToResponseDto).toList();
     }
     @Transactional
-    public LocationRequestResponseDto createNewLocationRequest(LocationRequestDto locationRequest){
-        User user = userRepository.findById(locationRequest.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + locationRequest.getUserId()));
+    public LocationRequestResponseDto createNewLocationRequest(LocationRequestDto locationRequest, SecurityUser currentUser){
+        validateFee(locationRequest.getFee(), locationRequest.isHasFee());
+
+        UUID userId = currentUser.getUser().getId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
 
         LocationRequest request = mapToEntity(locationRequest, user);
         request = locationRequestRepository.save(request);
@@ -79,8 +89,10 @@ public class LocationRequestService {
         locationRequestRepository.deleteById(locationRequestId);
     }
 
+    //TODO: Need update for admin to update fields if needed before approval.
+
     @Transactional
-    public LocationRequestResponseDto approveRequestStatus(UUID locationRequestId, RequestStatus newStatus, String adminComment){
+    public LocationRequestResponseDto updateRequestStatus(UUID locationRequestId, LocationRequestUpdateDto dto){
 
         LocationRequest request = locationRequestRepository.findById(locationRequestId).orElseThrow(() ->
                 new EntityNotFoundException("Location Request not found with ID: " + locationRequestId));
@@ -89,38 +101,45 @@ public class LocationRequestService {
             throw new IllegalStateException("Cannot modify a location request that has already been approved");
         }
 
-        if(adminComment != null){
-            request.setAdminComment(adminComment);
+        if(dto.getAdminComment() != null){
+            request.setAdminComment(dto.getAdminComment());
         }
 
-        request.setRequestStatus(newStatus);
+        RequestStatus newStatus = dto.getRequestStatus();
+
+        if (newStatus != null){
+            request.setRequestStatus(newStatus);
+        }
 
         if (newStatus == RequestStatus.APPROVED){
             User user = request.getUser();
             user.setContributionPoints(user.getContributionPoints() + ContributionPoints.APPROVED.getValue());
+            ToiletRequestDto newToilet = ToiletRequestDto.builder()
+                    .name(request.getName())
+                    .latitude(request.getLatitude())
+                    .longitude(request.getLongitude())
+                    .hasFee(request.isHasFee())
+                    .fee(request.getFee())
+                    .description(request.getDescription())
+                    .hasConditions(false)
+                    .isSeasonal(false)
+                    .isClosed(false)
+                    .build();
+
+            toiletService.createToilet(newToilet);
         }
-
-        ToiletRequestDto newToilet = ToiletRequestDto.builder()
-                .name(request.getName())
-                .latitude(request.getLatitude())
-                .longitude(request.getLongitude())
-                .hasFee(request.isHasFee())
-                .fee(request.getFee())
-                .description(request.getDescription())
-                .hasConditions(false)
-                .isSeasonal(false)
-                .isClosed(false)
-                .build();
-
-        toiletService.createToilet(newToilet);
-
         return mapToResponseDto(request);
     }
 
 
+    private void validateFee(BigDecimal fee, boolean hasFee){
+        if (hasFee && (fee == null || fee.compareTo(BigDecimal.ZERO) <= 0)) {
+            throw new IllegalStateException("Fee must be a value greater than 0 when hasFee is true");
+        }
+    }
 
     private LocationRequest mapToEntity(LocationRequestDto locationRequestDto, User user){
-        BigDecimal fee = locationRequestDto.isHasFee() ? locationRequestDto.getFee() : BigDecimal.valueOf(0);
+        BigDecimal fee = locationRequestDto.isHasFee() ? locationRequestDto.getFee() : null;
         return LocationRequest.builder()
                 .user(user)
                 .name(locationRequestDto.getName())

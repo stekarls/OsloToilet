@@ -21,9 +21,6 @@ public class ReviewRequestDto {
     @NotNull(message = "Toilet ID is required")
     private UUID toiletId;
 
-    @NotNull(message = "User ID is required")
-    private UUID userId;
-
     @Min(value = 1, message = "Cleanliness rating must be at least 1")
     @Max(value = 5, message = "Cleanliness rating cannot exceed 5")
     @NotNull(message = "Cleanliness rating is required")

@@ -28,7 +28,6 @@ public class ToiletRequestDto {
 
     private boolean hasFee;
 
-    @NotNull(message = "Fee amount is required")
     @DecimalMin("0.0")
     private BigDecimal fee;
 
@@ -46,6 +45,12 @@ public class ToiletRequestDto {
     private boolean isSeasonal;
     private boolean isClosed;
 
-
+    @SuppressWarnings("unused")
+    @AssertTrue(message = "A fee amount greater than 0 is required when hasFee is true, and no fee when it is false")
+    private boolean isFeeConsistent() {
+        return hasFee
+                ? fee != null && fee.compareTo(BigDecimal.ZERO) > 0
+                : fee == null;
+    }
 
 }

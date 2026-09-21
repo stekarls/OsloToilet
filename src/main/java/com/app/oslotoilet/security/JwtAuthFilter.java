@@ -36,11 +36,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
         String userId = jwtService.extractUserId(token);
-
+        //TODO: gets 500 on bad tokens, isTokenValid is not reached for expired token. extract user will throw
         if(userId != null && SecurityContextHolder.getContext().getAuthentication() == null){
             SecurityUser securityUser = (SecurityUser) customUserDetailsService.loadUserById(userId);
 
-            if (jwtService.isTokenValid(token, userId)) {
+            if (jwtService.isTokenValid(token, userId) && securityUser.isAccountNonLocked()) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(securityUser, null, securityUser.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);

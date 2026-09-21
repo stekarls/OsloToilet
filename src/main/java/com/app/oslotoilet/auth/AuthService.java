@@ -5,6 +5,7 @@ import com.app.oslotoilet.security.JwtService;
 import com.app.oslotoilet.user.User;
 import com.app.oslotoilet.user.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,6 +65,10 @@ public class AuthService {
 
         if(!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())){
             throw new BadCredentialsException("Invalid email or password");
+        }
+
+        if (user.isBanned()){
+            throw new LockedException("User is banned: " + user.getNickname());
         }
 
         String token = jwtService.generateToken(user.getId().toString());
