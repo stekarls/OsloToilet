@@ -32,8 +32,9 @@ public class ToiletService {
 
     @Transactional
     public ToiletResponseDto createToilet(ToiletRequestDto dto){
-        validateToiletState(dto.isAlwaysOpen(), dto.isClosed());
+        validateToiletClosed(dto.isAlwaysOpen(), dto.isClosed());
         validateFee(dto.getFee(), dto.isHasFee());
+        validateToiletConditions(dto.isHasConditions(), dto.getConditions());
 
         if (toiletRepository.existsByName(dto.getName())) {
             throw new IllegalStateException("A toilet with the name '" + dto.getName() + "' already exists");
@@ -61,6 +62,7 @@ public class ToiletService {
         if (dto.getLongitude() != null) toilet.setLongitude(dto.getLongitude());
         if (dto.getClosed() != null) toilet.setClosed(dto.getClosed());
         if (dto.getAlwaysOpen() != null) toilet.setAlwaysOpen(dto.getAlwaysOpen());
+        if (dto.getSeasonal() != null) toilet.setSeasonal(dto.getSeasonal());
 
         if(dto.getHasFee() != null){
             toilet.setHasFee(dto.getHasFee());
@@ -72,9 +74,6 @@ public class ToiletService {
             toilet.setFee(dto.getFee());
         }
 
-        validateToiletState(toilet.isAlwaysOpen(), toilet.isClosed());
-        validateFee(toilet.getFee(), toilet.isHasFee());
-
         if (dto.getDescription() != null) {
             if (dto.getDescription().isEmpty()) {
                 toilet.setDescription(null);
@@ -85,11 +84,17 @@ public class ToiletService {
         if (dto.getConditions() != null) {
             if (dto.getConditions().isEmpty()) {
                 toilet.setConditions(null);
+                toilet.setHasConditions(false);
             } else {
                 toilet.setConditions(dto.getConditions());
+                toilet.setHasConditions(true);
             }
         }
-        //TODO: Find more efficient way of updating updatedAt field
+
+        validateToiletClosed(toilet.isAlwaysOpen(), toilet.isClosed());
+        validateFee(toilet.getFee(), toilet.isHasFee());
+        validateToiletConditions(toilet.isHasConditions(), toilet.getConditions());
+
         toilet.setUpdatedAt(OffsetDateTime.now());
         return mapToResponseDto(toilet);
     }
@@ -132,9 +137,22 @@ public class ToiletService {
         }
         return toiletRepository.findAll();
     }
-    private void validateToiletState(boolean alwaysOpen, boolean closed) {
+    private void validateToiletClosed(boolean alwaysOpen, boolean closed) {
         if (alwaysOpen && closed) {
             throw new IllegalStateException("A toilet cannot be both always open and closed");
+        }
+    }
+
+    private void validateToiletConditions(boolean hasConditions, String conditions){
+        if(hasConditions){
+            if(conditions == null || conditions.isEmpty()){
+                throw new IllegalStateException("A toilet's conditions fields cannot be empty when toilet has conditions");
+            }
+
+        } else {
+            if (conditions != null){
+                throw new IllegalStateException("Toilet cannot have conditions when hasConditions is false");
+            }
         }
     }
     private void validateFee(BigDecimal fee, boolean hasFee){

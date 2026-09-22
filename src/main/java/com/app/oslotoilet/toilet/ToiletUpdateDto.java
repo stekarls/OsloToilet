@@ -24,7 +24,7 @@ public class ToiletUpdateDto {
     private Boolean hasFee;
     private BigDecimal fee;
     private Boolean alwaysOpen;
-    private Boolean isSeasonal;
+    private Boolean seasonal;
     private Boolean closed;
 
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
