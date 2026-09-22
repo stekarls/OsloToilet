@@ -2,18 +2,11 @@ package com.app.oslotoilet;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.context.annotation.Import;
 
 @SpringBootTest(properties = "jwt.secret=test-only-secret-key-that-is-at-least-32-bytes")
-@Testcontainers
+@Import(TestContainerConfig.class)
 class OsloToiletApplicationTests {
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16");
 
     @Test
     void contextLoads() {
