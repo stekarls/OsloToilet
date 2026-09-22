@@ -3,6 +3,7 @@ package com.app.oslotoilet.toilet;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -27,6 +28,8 @@ public class ToiletUpdateDto {
     private Boolean seasonal;
     private Boolean closed;
 
+    //Null means "no change", but a description that is sent must contain text
+    @Pattern(regexp = "(?s).*\\S.*", message = "Description cannot be blank")
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
 

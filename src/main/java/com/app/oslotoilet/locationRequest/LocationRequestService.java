@@ -123,7 +123,6 @@ public class LocationRequestService {
                     .hasFee(request.isHasFee())
                     .fee(request.getFee())
                     .description(request.getDescription())
-                    .hasConditions(false)
                     .isSeasonal(false)
                     .isClosed(false)
                     .build();

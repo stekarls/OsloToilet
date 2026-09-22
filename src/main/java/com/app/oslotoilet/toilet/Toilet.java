@@ -53,12 +53,10 @@ public class Toilet {
     @DecimalMin(value = "0.0", inclusive = false, message = "Fee must be greater than 0")
     private BigDecimal fee;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
+    @NotBlank(message = "Description is required")
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
-
-    @Column(name = "has_conditions", nullable = false)
-    private boolean hasConditions;
 
     @Column(columnDefinition = "TEXT")
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
@@ -98,5 +96,16 @@ public class Toilet {
     @OneToMany(mappedBy = "toilet", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ErrorReport> errorReports = new ArrayList<>();
+
+    //Derived rather than stored, so it can never disagree with the conditions text
+    public boolean isHasConditions() {
+        return conditions != null;
+    }
+
+    //Hibernate only runs this when a column value actually changed, so updatedAt reflects the last real change
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = OffsetDateTime.now();
+    }
 
 }

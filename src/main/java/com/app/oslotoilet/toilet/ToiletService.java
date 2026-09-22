@@ -34,9 +34,8 @@ public class ToiletService {
     public ToiletResponseDto createToilet(ToiletRequestDto dto){
         validateToiletClosed(dto.isAlwaysOpen(), dto.isClosed());
         validateFee(dto.getFee(), dto.isHasFee());
-        validateToiletConditions(dto.isHasConditions(), dto.getConditions());
 
-        if (toiletRepository.existsByName(dto.getName())) {
+        if (toiletRepository.existsByNameIgnoreCase(dto.getName())) {
             throw new IllegalStateException("A toilet with the name '" + dto.getName() + "' already exists");
         }
 
@@ -53,7 +52,7 @@ public class ToiletService {
 
 
         if (dto.getName() != null) {
-            if (toiletRepository.existsByNameAndIdNot(dto.getName(), toiletId)) {
+            if (toiletRepository.existsByNameIgnoreCaseAndIdNot(dto.getName(), toiletId)) {
                 throw new IllegalStateException("A toilet with the name '" + dto.getName() + "' already exists");
             }
             toilet.setName(dto.getName());
@@ -75,27 +74,20 @@ public class ToiletService {
         }
 
         if (dto.getDescription() != null) {
-            if (dto.getDescription().isEmpty()) {
-                toilet.setDescription(null);
-            } else {
-                toilet.setDescription(dto.getDescription());
+            if (dto.getDescription().isBlank()) {
+                throw new IllegalArgumentException("A toilet must have a description");
             }
+            toilet.setDescription(dto.getDescription());
         }
         if (dto.getConditions() != null) {
-            if (dto.getConditions().isEmpty()) {
-                toilet.setConditions(null);
-                toilet.setHasConditions(false);
-            } else {
-                toilet.setConditions(dto.getConditions());
-                toilet.setHasConditions(true);
-            }
+            toilet.setConditions(dto.getConditions().isBlank() ? null : dto.getConditions());
         }
 
         validateToiletClosed(toilet.isAlwaysOpen(), toilet.isClosed());
         validateFee(toilet.getFee(), toilet.isHasFee());
-        validateToiletConditions(toilet.isHasConditions(), toilet.getConditions());
 
-        toilet.setUpdatedAt(OffsetDateTime.now());
+        //Flushing runs @PreUpdate now, so the response carries the new updatedAt when something changed
+        toiletRepository.saveAndFlush(toilet);
         return mapToResponseDto(toilet);
     }
 
@@ -143,18 +135,6 @@ public class ToiletService {
         }
     }
 
-    private void validateToiletConditions(boolean hasConditions, String conditions){
-        if(hasConditions){
-            if(conditions == null || conditions.isEmpty()){
-                throw new IllegalStateException("A toilet's conditions fields cannot be empty when toilet has conditions");
-            }
-
-        } else {
-            if (conditions != null){
-                throw new IllegalStateException("Toilet cannot have conditions when hasConditions is false");
-            }
-        }
-    }
     private void validateFee(BigDecimal fee, boolean hasFee){
         if (hasFee) {
             if (fee == null || fee.compareTo(BigDecimal.ZERO) <= 0) {
@@ -167,6 +147,11 @@ public class ToiletService {
         }
     }
     private Toilet mapToEntity(ToiletRequestDto toiletRequestDto){
+        String conditions = toiletRequestDto.getConditions();
+        if (conditions != null && conditions.isBlank()) {
+            conditions = null;
+        }
+
         return Toilet.builder()
                 .name(toiletRequestDto.getName())
                 .latitude(toiletRequestDto.getLatitude())
@@ -175,8 +160,7 @@ public class ToiletService {
                 .fee(toiletRequestDto.getFee())
                 .description(toiletRequestDto.getDescription())
                 .alwaysOpen(toiletRequestDto.isAlwaysOpen())
-                .hasConditions(toiletRequestDto.isHasConditions())
-                .conditions(toiletRequestDto.getConditions())
+                .conditions(conditions)
                 .isSeasonal(toiletRequestDto.isSeasonal())
                 .isClosed(toiletRequestDto.isClosed())
                 .added(OffsetDateTime.now())

@@ -37,12 +37,11 @@ public class ToiletRequestDto {
 
     private boolean alwaysOpen;
 
-    private boolean hasConditions;
-
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String conditions;
 
     private boolean isSeasonal;
+
     private boolean isClosed;
 
     @SuppressWarnings("unused")
