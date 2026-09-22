@@ -11,7 +11,7 @@ import java.util.UUID;
 @Repository
 public interface OpeningHoursRepository extends JpaRepository<OpeningHours, UUID> {
 
-    List<OpeningHours> findByToiletOrderByDayOfWeekAsc(Toilet toilet);
+    List<OpeningHours> findByToilet(Toilet toilet);
 
     boolean existsByToiletAndDayOfWeek(Toilet toilet, DayOfWeek dayOfWeek);
 }

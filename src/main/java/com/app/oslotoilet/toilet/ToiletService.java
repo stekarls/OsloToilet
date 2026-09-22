@@ -87,6 +87,7 @@ public class ToiletService {
 
         validateToiletClosed(toilet.isAlwaysOpen(), toilet.isClosed());
         validateFee(toilet.getFee(), toilet.isHasFee());
+        validateAlwaysOpenHasNoOpeningHours(toilet);
 
         toiletRepository.saveAndFlush(toilet);
         return mapToResponseDto(toilet);
@@ -133,6 +134,12 @@ public class ToiletService {
     private void validateToiletClosed(boolean alwaysOpen, boolean closed) {
         if (alwaysOpen && closed) {
             throw new IllegalArgumentException("A toilet cannot be both always open and closed");
+        }
+    }
+
+    private void validateAlwaysOpenHasNoOpeningHours(Toilet toilet) {
+        if (toilet.isAlwaysOpen() && !toilet.getOpeningHours().isEmpty()) {
+            throw new IllegalStateException("Remove the toilet's opening hours before marking it as always open");
         }
     }
 

@@ -8,10 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.time.LocalTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,8 +28,9 @@ public class OpeningHoursService {
         Toilet toilet = toiletRepository.findById(toiletId)
                 .orElseThrow(() -> new EntityNotFoundException("Toilet not found with id: " + toiletId));
 
-        return openingHoursRepository.findByToiletOrderByDayOfWeekAsc(toilet)
+        return openingHoursRepository.findByToilet(toilet)
                 .stream()
+                .sorted(Comparator.comparing(OpeningHours::getDayOfWeek))
                 .map(this::mapToResponseDto)
                 .toList();
     }
@@ -40,6 +39,9 @@ public class OpeningHoursService {
     public OpeningHoursResponseDto addOpeningHours(UUID toiletId, OpeningHoursRequestDto dto) {
         Toilet toilet = toiletRepository.findById(toiletId)
                 .orElseThrow(() -> new EntityNotFoundException("Toilet not found with id: " + toiletId));
+
+        validateToiletIsNotAlwaysOpen(toilet);
+        validateTimes(dto.getOpeningTime(), dto.getClosingTime());
 
         if (openingHoursRepository.existsByToiletAndDayOfWeek(toilet, dto.getDayOfWeek())) {
             throw new IllegalStateException("Opening hours already exist for this toilet on " + dto.getDayOfWeek());
@@ -60,6 +62,9 @@ public class OpeningHoursService {
         Toilet toilet = toiletRepository.findById(toiletId)
                 .orElseThrow(() -> new EntityNotFoundException("Toilet not found with id: " + toiletId));
 
+        validateToiletIsNotAlwaysOpen(toilet);
+        dto.getOpeningHours().forEach(h -> validateTimes(h.getOpeningTime(), h.getClosingTime()));
+
         List<DayOfWeek> incomingDays = dto.getOpeningHours().stream()
                 .map(OpeningHoursRequestDto::getDayOfWeek)
                 .toList();
@@ -69,7 +74,7 @@ public class OpeningHoursService {
             throw new IllegalStateException("Duplicate days in request");
         }
 
-        List<OpeningHours> existing = openingHoursRepository.findByToiletOrderByDayOfWeekAsc(toilet);
+        List<OpeningHours> existing = openingHoursRepository.findByToilet(toilet);
         Set<DayOfWeek> existingDays = existing.stream()
                 .map(OpeningHours::getDayOfWeek)
                 .collect(Collectors.toSet());
@@ -93,6 +98,7 @@ public class OpeningHoursService {
 
         return openingHoursRepository.saveAll(toSave)
                 .stream()
+                .sorted(Comparator.comparing(OpeningHours::getDayOfWeek))
                 .map(this::mapToResponseDto)
                 .toList();
     }
@@ -109,6 +115,8 @@ public class OpeningHoursService {
         if (dto.getOpeningTime() != null) openingHours.setOpeningTime(dto.getOpeningTime());
         if (dto.getClosingTime() != null) openingHours.setClosingTime(dto.getClosingTime());
 
+        validateTimes(openingHours.getOpeningTime(), openingHours.getClosingTime());
+
         return mapToResponseDto(openingHours);
     }
 
@@ -122,6 +130,20 @@ public class OpeningHoursService {
         }
 
         openingHoursRepository.delete(openingHours);
+    }
+
+    //A closing time before the opening time is allowed and means the toilet closes after midnight, e.g. 18:00-02:00.
+    //Equal times are rejected, since they say nothing, and a toilet open around the clock is marked alwaysOpen instead
+    private void validateTimes(LocalTime openingTime, LocalTime closingTime) {
+        if (openingTime.equals(closingTime)) {
+            throw new IllegalArgumentException("Opening and closing time cannot be the same");
+        }
+    }
+
+    private void validateToiletIsNotAlwaysOpen(Toilet toilet) {
+        if (toilet.isAlwaysOpen()) {
+            throw new IllegalStateException("An always open toilet cannot have opening hours");
+        }
     }
 
     private OpeningHoursResponseDto mapToResponseDto(OpeningHours oh) {

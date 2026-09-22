@@ -1,5 +1,6 @@
 package com.app.oslotoilet.services;
 
+import com.app.oslotoilet.openingHours.OpeningHours;
 import com.app.oslotoilet.toilet.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -489,6 +492,37 @@ public class ToiletServiceTests {
 
             assertTrue(response.isClosed());
             assertFalse(response.isAlwaysOpen());
+        }
+    }
+
+    @Nested
+    class UpdateToiletAlwaysOpen {
+
+        @BeforeEach
+        void givenExistingToiletThatIsNotAlwaysOpen() {
+            givenExistingToilet();
+        }
+
+        @Test
+        void updateToilet_shouldReject_andSaveNothing_whenMadeAlwaysOpenWhileItHasOpeningHours() {
+            existingToilet.getOpeningHours().add(OpeningHours.builder()
+                    .toilet(existingToilet)
+                    .dayOfWeek(DayOfWeek.MONDAY)
+                    .openingTime(LocalTime.of(8, 0))
+                    .closingTime(LocalTime.of(20, 0))
+                    .build());
+            ToiletUpdateDto patch = ToiletUpdateDto.builder().alwaysOpen(true).build();
+
+            assertThrows(IllegalStateException.class, () -> toiletService.updateToilet(patch, toiletId));
+
+            verify(toiletRepository, never()).saveAndFlush(any());
+        }
+
+        @Test
+        void updateToilet_shouldAllowMakingToiletAlwaysOpen_whenItHasNoOpeningHours() {
+            ToiletResponseDto response = toiletService.updateToilet(ToiletUpdateDto.builder().alwaysOpen(true).build(), toiletId);
+
+            assertTrue(response.isAlwaysOpen());
         }
     }
 
