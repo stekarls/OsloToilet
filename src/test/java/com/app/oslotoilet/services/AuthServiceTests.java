@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.OffsetDateTime;
@@ -60,9 +61,9 @@ public class AuthServiceTests {
         void register_shouldSucceed_whenEmailAndNicknameAreUnique() {
             UUID generatedUserId = UUID.randomUUID();
 
-            when(userRepository.existsByEmail("alice@example.com")).thenReturn(false);
-            when(userRepository.existsByNickname("Alice")).thenReturn(false);
-            when(passwordEncoder.encode("rawPassword123")).thenReturn("encoded-password");
+            when(userRepository.existsByEmail(registerRequest.getEmail())).thenReturn(false);
+            when(userRepository.existsByNickname(registerRequest.getNickname())).thenReturn(false);
+            when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn("encoded-password");
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
                 User user = invocation.getArgument(0);
                 user.setId(generatedUserId);
@@ -82,7 +83,7 @@ public class AuthServiceTests {
 
         @Test
         void register_shouldThrow_whenEmailAlreadyExists() {
-            when(userRepository.existsByEmail("alice@example.com")).thenReturn(true);
+            when(userRepository.existsByEmail(registerRequest.getEmail())).thenReturn(true);
 
             assertThrows(IllegalStateException.class, () -> authService.register(registerRequest));
 
@@ -93,8 +94,8 @@ public class AuthServiceTests {
 
         @Test
         void register_shouldThrow_whenNicknameAlreadyExists() {
-            when(userRepository.existsByEmail("alice@example.com")).thenReturn(false);
-            when(userRepository.existsByNickname("Alice")).thenReturn(true);
+            when(userRepository.existsByEmail(registerRequest.getEmail())).thenReturn(false);
+            when(userRepository.existsByNickname(registerRequest.getNickname())).thenReturn(true);
 
             assertThrows(IllegalStateException.class, () -> authService.register(registerRequest));
 
@@ -105,9 +106,9 @@ public class AuthServiceTests {
         @Test
         void register_shouldHashPassword_beforeSavingUser() {
             UUID generatedUserId = UUID.randomUUID();
-            when(userRepository.existsByEmail("alice@example.com")).thenReturn(false);
-            when(userRepository.existsByNickname("Alice")).thenReturn(false);
-            when(passwordEncoder.encode("rawPassword123")).thenReturn("encoded-password");
+            when(userRepository.existsByEmail(registerRequest.getEmail())).thenReturn(false);
+            when(userRepository.existsByNickname(registerRequest.getNickname())).thenReturn(false);
+            when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn("encoded-password");
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
                 User user = invocation.getArgument(0);
                 user.setId(generatedUserId);
@@ -155,8 +156,8 @@ public class AuthServiceTests {
         @Test
         void login_shouldSucceed_whenEmailAndPasswordAreCorrect() {
 
-            when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.of(mockUser));
-            when(passwordEncoder.matches("current-password", "encoded-password")).thenReturn(true);
+            when(userRepository.findByEmail(loginRequestDto.getEmail())).thenReturn(Optional.of(mockUser));
+            when(passwordEncoder.matches(loginRequestDto.getPassword(), mockUser.getPassword())).thenReturn(true);
             when(jwtService.generateToken(userId.toString())).thenReturn("mocked-jwt-token");
 
             AuthResponseDto response = authService.login(loginRequestDto);
@@ -168,7 +169,7 @@ public class AuthServiceTests {
 
         @Test
         void login_shouldThrow_whenEmailIsNotFound() {
-            when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.empty());
+            when(userRepository.findByEmail(loginRequestDto.getEmail())).thenReturn(Optional.empty());
 
             assertThrows(BadCredentialsException.class, () -> authService.login(loginRequestDto));
 
@@ -177,16 +178,35 @@ public class AuthServiceTests {
 
         @Test
         void login_shouldThrow_whenPasswordIsIncorrect() {
-            when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.of(mockUser));
-            when(passwordEncoder.matches("current-password", "encoded-password")).thenReturn(false);
+            when(userRepository.findByEmail(loginRequestDto.getEmail())).thenReturn(Optional.of(mockUser));
+            when(passwordEncoder.matches(loginRequestDto.getPassword(), "encoded-password")).thenReturn(false);
 
             assertThrows(BadCredentialsException.class, () -> authService.login(loginRequestDto));
 
             verifyNoInteractions(jwtService);
-
         }
 
+        @Test
+        void login_shouldThrowLockedException_whenUserIsBanned() {
+            mockUser.setBanned(true);
+            when(userRepository.findByEmail(loginRequestDto.getEmail())).thenReturn(Optional.of(mockUser));
+            when(passwordEncoder.matches(loginRequestDto.getPassword(), mockUser.getPassword())).thenReturn(true);
 
+            assertThrows(LockedException.class, () -> authService.login(loginRequestDto));
+
+            verifyNoInteractions(jwtService);
+        }
+
+        @Test
+        void login_shouldThrowBadCredentials_whenUserIsBannedAndPasswordIsIncorrect() {
+            mockUser.setBanned(true);
+            when(userRepository.findByEmail(loginRequestDto.getEmail())).thenReturn(Optional.of(mockUser));
+            when(passwordEncoder.matches(loginRequestDto.getPassword(), mockUser.getPassword())).thenReturn(false);
+
+            assertThrows(BadCredentialsException.class, () -> authService.login(loginRequestDto));
+
+            verifyNoInteractions(jwtService);
+        }
     }
 
 }
