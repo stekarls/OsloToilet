@@ -30,7 +30,7 @@ public class User {
     @GeneratedValue (strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(unique = true, length = 50, nullable = false)
+    @Column(unique = true, length = 12, nullable = false)
     @NotBlank(message = "Username is required")
     @Size(min = 5, max = 12, message = "Nickname must be between 5 and 12 characters")
     private String nickname;

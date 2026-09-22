@@ -86,13 +86,17 @@ public class ReviewService {
         if (!isAdmin && !review.getUser().getId().equals(currentUser.getUser().getId())){
             throw new AccessDeniedException("You can only delete your own reviews");
         }
-        reviewRepository.deleteById(reviewId);
+        //Take back the points the author earned for the review, without going below zero
+        User author = review.getUser();
+        author.setContributionPoints(Math.max(0, author.getContributionPoints() - ContributionPoints.REVIEW.getValue()));
+
+        reviewRepository.delete(review);
     }
 
 
 
     private Review mapToEntity(ReviewRequestDto reviewRequestDto, User user, Toilet toilet){
-        double averageRating = getAverageRating(reviewRequestDto.getCleanliness(), reviewRequestDto.getAccess(), reviewRequestDto.getEquipment());
+        double averageRating = getAverageRating(reviewRequestDto.getCleanliness(), reviewRequestDto.getEquipment(), reviewRequestDto.getAccess());
         return Review.builder()
                 .user(user)
                 .toilet(toilet)
@@ -120,7 +124,7 @@ public class ReviewService {
                 .build();
     }
 
-    public double getAverageRating(Short cleanliness, Short equipment, Short access){
+    private double getAverageRating(Short cleanliness, Short equipment, Short access){
         return (cleanliness + equipment + access) / 3.0;
     }
 }
