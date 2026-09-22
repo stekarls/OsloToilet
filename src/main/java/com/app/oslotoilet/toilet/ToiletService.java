@@ -33,7 +33,7 @@ public class ToiletService {
     @Transactional
     public ToiletResponseDto createToilet(ToiletRequestDto dto){
         validateToiletClosed(dto.isAlwaysOpen(), dto.isClosed());
-        validateFee(dto.getFee(), dto.isHasFee());
+        validateFee(dto.getFee(), dto.getHasFee());
         String name = normalizeName(dto.getName());
 
         if (toiletRepository.existsByNameIgnoreCase(name)) {
@@ -173,7 +173,7 @@ public class ToiletService {
                 .name(name)
                 .latitude(toiletRequestDto.getLatitude())
                 .longitude(toiletRequestDto.getLongitude())
-                .hasFee(toiletRequestDto.isHasFee())
+                .hasFee(toiletRequestDto.getHasFee())
                 .fee(toiletRequestDto.getFee())
                 .description(toiletRequestDto.getDescription())
                 .alwaysOpen(toiletRequestDto.isAlwaysOpen())

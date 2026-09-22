@@ -161,6 +161,17 @@ Content-Type: application/json
 
 Both fields are optional — omitting one leaves the current value untouched. Error reports are updated the same way via `PATCH /api/v1/error-reports/{id}` with `status` and `adminComment`.
 
+### Contributions
+
+| What the user wants          | How                                                                                   | Result                                                                                           |
+|------------------------------|---------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| Add a new toilet             | `POST /api/v1/location-requests` with optional `featureCodes` and `paymentCodes`      | On approval the toilet is created with those features and payment options                       |
+| Correct an existing toilet   | `POST /api/v1/error-reports` describing the problem                                   | An admin fixes the data and marks the report `FIXED`                                             |
+
+Features and payment options carry a `source` set by the server, never by the client: `USER_CONTRIBUTION` when they come from an approved location request, `ADMIN` when an admin adds them directly (and `OFFICIAL_DATA` for imported data). `verifiedAt` is set when an admin confirms them; admin-added ones are verified immediately.
+
+Contribution points: approved location request **100**, fixed error report **30**, review **20** (taken back if the review is deleted). A fixed error report cannot be moved to another status, since the points have already been given.
+
 ## Roadmap
 
 - [ ] Refresh tokens

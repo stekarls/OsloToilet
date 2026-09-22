@@ -1,6 +1,7 @@
 package com.app.oslotoilet.errorReport;
 
 
+import com.app.oslotoilet.enums.ContributionPoints;
 import com.app.oslotoilet.enums.RequestStatus;
 import com.app.oslotoilet.enums.Role;
 import com.app.oslotoilet.security.SecurityUser;
@@ -70,11 +71,21 @@ public class ErrorReportService {
     public ErrorReportResponseDto changeStatus(UUID reportId, ErrorReportUpdateDto dto){
         ErrorReport errorReport = errorReportRepository.findById(reportId).orElseThrow(() -> new EntityNotFoundException("Error report not found with ID: " + reportId));
 
+        RequestStatus newStatus = dto.getStatus();
+
+        if (errorReport.getStatus() == RequestStatus.FIXED && newStatus != null && newStatus != RequestStatus.FIXED) {
+            throw new IllegalStateException("Cannot change the status of an error report that has been fixed");
+        }
+
         if (dto.getAdminComment() != null){
             errorReport.setAdminComment(dto.getAdminComment());
         }
-        if(dto.getStatus() != null){
-            errorReport.setStatus(dto.getStatus());
+        if (newStatus == RequestStatus.FIXED && errorReport.getStatus() != RequestStatus.FIXED){
+            User reporter = errorReport.getUser();
+            reporter.setContributionPoints(reporter.getContributionPoints() + ContributionPoints.ERROR_REPORT_FIXED.getValue());
+        }
+        if(newStatus != null){
+            errorReport.setStatus(newStatus);
         }
         errorReport.setUpdated(OffsetDateTime.now());
 

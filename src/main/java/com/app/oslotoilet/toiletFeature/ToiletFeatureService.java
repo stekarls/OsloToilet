@@ -1,5 +1,6 @@
 package com.app.oslotoilet.toiletFeature;
 
+import com.app.oslotoilet.enums.SourceType;
 import com.app.oslotoilet.feature.Feature;
 import com.app.oslotoilet.feature.FeatureRepository;
 import com.app.oslotoilet.toilet.Toilet;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -59,7 +61,8 @@ public class ToiletFeatureService {
         ToiletFeature toiletFeature = ToiletFeature.builder()
                 .toilet(toilet)
                 .feature(feature)
-                .source(dto.getSource())
+                .source(SourceType.ADMIN)
+                .verifiedAt(OffsetDateTime.now())
                 .build();
 
         return mapToResponseDto(toiletFeatureRepository.save(toiletFeature));
@@ -92,7 +95,8 @@ public class ToiletFeatureService {
                 .map(f -> ToiletFeature.builder()
                         .toilet(toilet)
                         .feature(f)
-                        .source(dto.getSource())
+                        .source(SourceType.ADMIN)
+                        .verifiedAt(OffsetDateTime.now())
                         .build())
                 .toList();
 
@@ -106,13 +110,30 @@ public class ToiletFeatureService {
                 .toList();
     }
 
+    //Used when a location request is approved
+    @Transactional
+    public void addUserContributedFeatures(UUID toiletId, Collection<Feature> features) {
+        Toilet toilet = toiletRepository.findById(toiletId)
+                .orElseThrow(() -> new EntityNotFoundException("Toilet not found with id: " + toiletId));
+
+        List<ToiletFeature> toSave = features.stream()
+                .map(f -> ToiletFeature.builder()
+                        .toilet(toilet)
+                        .feature(f)
+                        .source(SourceType.USER_CONTRIBUTION)
+                        .build())
+                .toList();
+
+        toiletFeatureRepository.saveAll(toSave);
+    }
+
     @Transactional
     public ToiletFeatureResponseDto verifyFeature(UUID toiletId, UUID toiletFeatureId) {
         ToiletFeature link = toiletFeatureRepository.findById(toiletFeatureId)
                 .orElseThrow(() -> new EntityNotFoundException("Toilet-feature link not found with id: " + toiletFeatureId));
 
         if (!link.getToilet().getId().equals(toiletId)) {
-            throw new AccessDeniedException("Toilet-featrue link does not belong to toilet with id: " + toiletId);
+            throw new AccessDeniedException("Toilet-feature link does not belong to toilet with id: " + toiletId);
         }
 
         link.setVerifiedAt(OffsetDateTime.now());

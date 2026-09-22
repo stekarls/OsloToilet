@@ -16,7 +16,6 @@ import java.util.UUID;
 public class ToiletPaymentOptionResponseDto {
     private UUID id;
     private UUID toiletId;
-    private Boolean test;
     private PaymentCode paymentCode;
     private OffsetDateTime verifiedAt;
     private SourceType source;

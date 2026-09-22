@@ -25,7 +25,8 @@ public class ToiletRequestDto {
     @DecimalMin("-180.0") @DecimalMax("180.0")
     private BigDecimal longitude;
 
-    private boolean hasFee;
+    @NotNull(message = "hasFee is required")
+    private Boolean hasFee;
 
     @DecimalMin("0.0")
     private BigDecimal fee;
@@ -46,6 +47,9 @@ public class ToiletRequestDto {
     @SuppressWarnings("unused")
     @AssertTrue(message = "A fee amount greater than 0 is required when hasFee is true, and no fee when it is false")
     private boolean isFeeConsistent() {
+        if (hasFee == null) {
+            return true;
+        }
         return hasFee
                 ? fee != null && fee.compareTo(BigDecimal.ZERO) > 0
                 : fee == null;
