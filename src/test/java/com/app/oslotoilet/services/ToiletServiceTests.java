@@ -80,7 +80,10 @@ public class ToiletServiceTests {
                 .longitude(LONGITUDE)
                 .hasFee(false)
                 .fee(null)
-                .description(DESCRIPTION);
+                .description(DESCRIPTION)
+                .alwaysOpen(false)
+                .seasonal(false)
+                .closed(false);
     }
 
     private void givenExistingToilet() {
@@ -129,7 +132,7 @@ public class ToiletServiceTests {
             givenNameIsFreeAndSaveSucceeds();
             ToiletRequestDto request = validFreeToiletRequest()
                     .alwaysOpen(true)
-                    .isSeasonal(true)
+                    .seasonal(true)
                     .build();
 
             ToiletResponseDto response = toiletService.createToilet(request);
@@ -210,7 +213,7 @@ public class ToiletServiceTests {
 
         @Test
         void createToilet_shouldReject_andSaveNothing_whenToiletIsBothAlwaysOpenAndClosed() {
-            ToiletRequestDto request = validFreeToiletRequest().alwaysOpen(true).isClosed(true).build();
+            ToiletRequestDto request = validFreeToiletRequest().alwaysOpen(true).closed(true).build();
 
             assertThrows(IllegalArgumentException.class, () -> toiletService.createToilet(request));
 

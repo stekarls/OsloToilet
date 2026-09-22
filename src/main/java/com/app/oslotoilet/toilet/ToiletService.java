@@ -1,10 +1,15 @@
 package com.app.oslotoilet.toilet;
 
+import com.app.oslotoilet.openingHours.OpeningHours;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -15,13 +20,25 @@ import java.util.UUID;
 public class ToiletService {
 
     private final ToiletRepository toiletRepository;
+    private final Clock clock;
 
-    public ToiletService(ToiletRepository toiletRepository){
+    public ToiletService(ToiletRepository toiletRepository, Clock clock){
         this.toiletRepository = toiletRepository;
+        this.clock = clock;
     }
 
     public List<ToiletResponseDto> findAll(String sort){
         return toiletSortMapper(sort).stream().map(this::mapToResponseDto).toList();
+    }
+
+    public List<ToiletMarkerResponseDto> findAllMarkers(Boolean hasFee, boolean openNow){
+        LocalDateTime now = LocalDateTime.now(clock);
+
+        return toiletRepository.findAllWithOpeningHours().stream()
+                .filter(toilet -> hasFee == null || toilet.isHasFee() == hasFee)
+                .map(toilet -> mapToMarker(toilet, isOpenAt(toilet, now)))
+                .filter(marker -> !openNow || !Boolean.FALSE.equals(marker.getOpenNow()))
+                .toList();
     }
 
     public ToiletResponseDto findById(UUID id){
@@ -32,7 +49,7 @@ public class ToiletService {
 
     @Transactional
     public ToiletResponseDto createToilet(ToiletRequestDto dto){
-        validateToiletClosed(dto.isAlwaysOpen(), dto.isClosed());
+        validateToiletClosed(dto.getAlwaysOpen(), dto.getClosed());
         validateFee(dto.getFee(), dto.getHasFee());
         String name = normalizeName(dto.getName());
 
@@ -176,10 +193,10 @@ public class ToiletService {
                 .hasFee(toiletRequestDto.getHasFee())
                 .fee(toiletRequestDto.getFee())
                 .description(toiletRequestDto.getDescription())
-                .alwaysOpen(toiletRequestDto.isAlwaysOpen())
+                .alwaysOpen(toiletRequestDto.getAlwaysOpen())
                 .conditions(conditions)
-                .isSeasonal(toiletRequestDto.isSeasonal())
-                .isClosed(toiletRequestDto.isClosed())
+                .isSeasonal(toiletRequestDto.getSeasonal())
+                .isClosed(toiletRequestDto.getClosed())
                 .added(OffsetDateTime.now())
                 .updatedAt(OffsetDateTime.now())
                 .build();
@@ -200,6 +217,51 @@ public class ToiletService {
                 .isClosed(toilet.isClosed())
                 .added(toilet.getAdded())
                 .updatedAt(toilet.getUpdatedAt())
+                .build();
+    }
+
+    private Boolean isOpenAt(Toilet toilet, LocalDateTime now) {
+        if (toilet.isClosed()) {
+            return false;
+        }
+        if (toilet.isAlwaysOpen()) {
+            return true;
+        }
+        if (toilet.getOpeningHours().isEmpty()) {
+            return null;
+        }
+
+        DayOfWeek today = now.getDayOfWeek();
+        DayOfWeek yesterday = today.minus(1);
+        LocalTime time = now.toLocalTime();
+
+        for (OpeningHours hours : toilet.getOpeningHours()) {
+            LocalTime opens = hours.getOpeningTime();
+            LocalTime closes = hours.getClosingTime();
+            boolean overnight = closes.isBefore(opens);
+
+            if (hours.getDayOfWeek() == today) {
+                boolean afterOpening = !time.isBefore(opens);
+                if (overnight ? afterOpening : afterOpening && time.isBefore(closes)) {
+                    return true;
+                }
+            }
+            //e.g. Friday 18:00-02:00 is still open at 01:00 on Saturday
+            if (overnight && hours.getDayOfWeek() == yesterday && time.isBefore(closes)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private ToiletMarkerResponseDto mapToMarker(Toilet toilet, Boolean openNow){
+        return ToiletMarkerResponseDto.builder()
+                .id(toilet.getId())
+                .name(toilet.getName())
+                .hasFee(toilet.isHasFee())
+                .latitude(toilet.getLatitude())
+                .longitude(toilet.getLongitude())
+                .openNow(openNow)
                 .build();
     }
 

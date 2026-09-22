@@ -116,6 +116,7 @@ The API will be available at `http://localhost:8080`.
 | Auth                    | `/api/v1/auth`                                |
 | Users                   | `/api/v1/users`                               |
 | Toilets                 | `/api/v1/toilets`                             |
+| Toilet map markers      | `/api/v1/toilets/markers?hasFee=&openNow=`    |
 | Opening hours           | `/api/v1/toilets/{toiletId}/opening-hours`    |
 | Toilet features         | `/api/v1/toilets/{toiletId}/features`         |
 | Toilet payment options  | `/api/v1/toilets/{toiletId}/payment-options`  |
@@ -126,6 +127,8 @@ The API will be available at `http://localhost:8080`.
 | Error reports           | `/api/v1/error-reports?status=`               |
 | Location requests       | `/api/v1/location-requests?userId=&status=`   |
 | Leaderboard             | `/api/v1/leaderboard`                         |
+
+`GET /api/v1/toilets` is meant for the list view, and `GET /api/v1/toilets/markers` for the map. Every marker has `openNow`, calculated in Oslo time: `true` (open), `false` (closed) or `null` (unknown, the toilet is not always open and has no opening hours registered). `openNow=true` hides toilets known to be closed but keeps the unknown ones. Seasonal toilets and public holidays are not taken into account.
 
 Example: register and get a token
 

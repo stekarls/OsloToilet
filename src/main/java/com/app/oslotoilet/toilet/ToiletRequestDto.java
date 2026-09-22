@@ -35,14 +35,17 @@ public class ToiletRequestDto {
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
 
-    private boolean alwaysOpen;
+    @NotNull(message = "alwaysOpen is required")
+    private Boolean alwaysOpen;
 
     @Size(max = 1000, message = "Conditions cannot exceed 1000 characters")
     private String conditions;
 
-    private boolean isSeasonal;
+    @NotNull(message = "seasonal is required")
+    private Boolean seasonal;
 
-    private boolean isClosed;
+    @NotNull(message = "closed is required")
+    private Boolean closed;
 
     @SuppressWarnings("unused")
     @AssertTrue(message = "A fee amount greater than 0 is required when hasFee is true, and no fee when it is false")

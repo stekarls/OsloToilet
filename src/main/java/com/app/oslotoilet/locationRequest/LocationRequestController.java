@@ -4,12 +4,13 @@ package com.app.oslotoilet.locationRequest;
 import com.app.oslotoilet.enums.RequestStatus;
 import com.app.oslotoilet.security.SecurityUser;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +38,11 @@ public class LocationRequestController {
     @PostMapping
     public ResponseEntity<LocationRequestResponseDto> createNewLocationRequest(@Valid @RequestBody LocationRequestDto locationRequest, @AuthenticationPrincipal SecurityUser currentUser){
         LocationRequestResponseDto response = locationRequestService.createNewLocationRequest(locationRequest, currentUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(response.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(response);
     }
 
 

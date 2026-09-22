@@ -97,12 +97,10 @@ public class Toilet {
     @Builder.Default
     private List<ErrorReport> errorReports = new ArrayList<>();
 
-    //Derived rather than stored, so it can never disagree with the conditions text
     public boolean isHasConditions() {
         return conditions != null;
     }
 
-    //Hibernate only runs this when a column value actually changed, so updatedAt reflects the last real change
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = OffsetDateTime.now();
