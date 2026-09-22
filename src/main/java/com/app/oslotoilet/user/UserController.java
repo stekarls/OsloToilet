@@ -2,11 +2,12 @@ package com.app.oslotoilet.user;
 
 
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +38,12 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody AdminCreateUserDto user){
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUserAsAdmin(user));
+        UserResponseDto created = userService.createUserAsAdmin(user);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(created.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(created);
     }
 
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.user.id")

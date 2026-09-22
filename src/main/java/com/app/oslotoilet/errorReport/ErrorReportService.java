@@ -46,7 +46,7 @@ public class ErrorReportService {
         UUID userId = currentUser.getUser().getId();
 
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
-        Toilet toilet = toiletRepository.findById(errorReportRequestDto.getToiletID()).orElseThrow(() -> new EntityNotFoundException("Toilet not found with ID: " + errorReportRequestDto.getToiletID()));
+        Toilet toilet = toiletRepository.findById(errorReportRequestDto.getToiletId()).orElseThrow(() -> new EntityNotFoundException("Toilet not found with ID: " + errorReportRequestDto.getToiletId()));
 
         ErrorReport errorReport = mapToEntity(errorReportRequestDto, user, toilet);
         errorReport =  errorReportRepository.save(errorReport);

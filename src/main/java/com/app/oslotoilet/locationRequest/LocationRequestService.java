@@ -144,8 +144,9 @@ public class LocationRequestService {
                     .hasFee(request.isHasFee())
                     .fee(request.getFee())
                     .description(request.getDescription())
-                    .isSeasonal(false)
-                    .isClosed(false)
+                    .alwaysOpen(false)
+                    .seasonal(false)
+                    .closed(false)
                     .build();
 
             ToiletResponseDto toilet = toiletService.createToilet(newToilet);
