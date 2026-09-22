@@ -119,11 +119,13 @@ The API will be available at `http://localhost:8080`.
 | Opening hours           | `/api/v1/toilets/{toiletId}/opening-hours`    |
 | Toilet features         | `/api/v1/toilets/{toiletId}/features`         |
 | Toilet payment options  | `/api/v1/toilets/{toiletId}/payment-options`  |
+| Toilet reviews          | `/api/v1/toilets/{toiletId}/reviews`          |
 | Features (reference)    | `/api/v1/features`                            |
 | Payment options (ref.)  | `/api/v1/payment-options`                     |
-| Reviews                 | `/api/v1/reviews`                             |
-| Error reports           | `/api/v1/error-reports`                       |
-| Location requests       | `/api/v1/location-requests`                   |
+| Reviews                 | `/api/v1/reviews?toiletId=&userId=`           |
+| Error reports           | `/api/v1/error-reports?status=`               |
+| Location requests       | `/api/v1/location-requests?userId=&status=`   |
+| Leaderboard             | `/api/v1/leaderboard`                         |
 
 Example: register and get a token
 

@@ -32,8 +32,21 @@ public class LocationRequestService {
         this.toiletService = toiletService;
     }
 
-    public List<LocationRequestResponseDto> getAllRequests(){
-        return locationRequestRepository.findAllWithUser().stream().map(this::mapToResponseDto).toList();
+    //Both filters are optional and can be combined
+    public List<LocationRequestResponseDto> getRequests(UUID userId, RequestStatus status){
+        List<LocationRequest> requests;
+
+        if (userId != null && status != null) {
+            requests = locationRequestRepository.findByuserIdAndRequestStatus(userId, status);
+        } else if (userId != null) {
+            requests = locationRequestRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        } else if (status != null) {
+            requests = locationRequestRepository.findByRequestStatus(status);
+        } else {
+            requests = locationRequestRepository.findAllWithUser();
+        }
+
+        return requests.stream().map(this::mapToResponseDto).toList();
     }
 
     public LocationRequestResponseDto getByLocationRequestId(UUID requestId, SecurityUser currentUser){
@@ -48,17 +61,6 @@ public class LocationRequestService {
         return mapToResponseDto(locationRequest);
     }
 
-    public List<LocationRequestResponseDto> getByRequestStatus(RequestStatus requestStatus){
-        return locationRequestRepository.findByRequestStatus(requestStatus).stream().map(this::mapToResponseDto).toList();
-    }
-
-    public List<LocationRequestResponseDto> getByUserIdAndRequestStatus(UUID userId, RequestStatus requestStatus){
-        return locationRequestRepository.findByuserIdAndRequestStatus(userId, requestStatus).stream().map(this::mapToResponseDto).toList();
-    }
-
-    public List<LocationRequestResponseDto> getByUserIdOrderByCreatedAtDesc(UUID userId){
-        return locationRequestRepository.findByUserIdOrderByCreatedAtDesc(userId).stream().map(this::mapToResponseDto).toList();
-    }
     @Transactional
     public LocationRequestResponseDto createNewLocationRequest(LocationRequestDto locationRequest, SecurityUser currentUser){
         validateFee(locationRequest.getFee(), locationRequest.isHasFee());

@@ -96,14 +96,16 @@ public class UserServiceTests {
         }
 
         @Test
-        void sortByContributionPoints_shouldReturnMappedDtoList(){
+        void getLeaderboard_shouldReturnMappedEntriesInRepositoryOrder(){
             when(userRepository.findAllByOrderByContributionPointsDesc()).thenReturn(List.of(user2, user1));
 
-            List<UserResponseDto> result = userService.sortByContributionPoints();
+            List<LeaderboardEntryDto> result = userService.getLeaderboard();
 
             assertEquals(2, result.size());
             assertEquals(user2.getNickname(), result.get(0).getNickname());
+            assertEquals(user2.getContributionPoints(), result.get(0).getContributionPoints());
             assertEquals(user1.getNickname(), result.get(1).getNickname());
+            assertEquals(user1.getContributionPoints(), result.get(1).getContributionPoints());
             verify(userRepository).findAllByOrderByContributionPointsDesc();
         }
 

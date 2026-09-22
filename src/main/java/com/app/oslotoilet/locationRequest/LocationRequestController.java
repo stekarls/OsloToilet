@@ -23,28 +23,15 @@ public class LocationRequestController {
         this.locationRequestService = locationRequestService;
     }
 
-
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.user.id")
     @GetMapping
-    public ResponseEntity<List<LocationRequestResponseDto>> getRequests(@RequestParam(required = false) RequestStatus status){
-        if (status != null){
-            return ResponseEntity.ok(locationRequestService.getByRequestStatus(status));
-        }
-        return ResponseEntity.ok(locationRequestService.getAllRequests());
+    public ResponseEntity<List<LocationRequestResponseDto>> getRequests(@RequestParam(required = false) UUID userId, @RequestParam(required = false) RequestStatus status){
+        return ResponseEntity.ok(locationRequestService.getRequests(userId, status));
     }
 
     @GetMapping("/{requestId}")
     public ResponseEntity<LocationRequestResponseDto> getByLocationRequestId(@PathVariable UUID requestId, @AuthenticationPrincipal SecurityUser currentUser){
         return ResponseEntity.ok(locationRequestService.getByLocationRequestId(requestId, currentUser));
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.user.id")
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<LocationRequestResponseDto>> getRequestsByUser(@PathVariable UUID userId, @RequestParam(required = false) RequestStatus status){
-        if (status != null){
-            return ResponseEntity.ok(locationRequestService.getByUserIdAndRequestStatus(userId, status));
-        }
-        return ResponseEntity.ok(locationRequestService.getByUserIdOrderByCreatedAtDesc(userId));
     }
 
     @PostMapping
@@ -54,16 +41,16 @@ public class LocationRequestController {
     }
 
 
-    @DeleteMapping("/{locationRequestId}")
-    public ResponseEntity<Void> deleteLocationRequestbyId(@PathVariable UUID locationRequestId, @AuthenticationPrincipal SecurityUser currentUser){
-            locationRequestService.deleteLocationRequestById(locationRequestId, currentUser);
+    @DeleteMapping("/{requestId}")
+    public ResponseEntity<Void> deleteLocationRequestById(@PathVariable UUID requestId, @AuthenticationPrincipal SecurityUser currentUser){
+            locationRequestService.deleteLocationRequestById(requestId, currentUser);
             return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/{id}")
-    public ResponseEntity<LocationRequestResponseDto> updateRequestStatus(@PathVariable UUID id, @RequestBody @Valid LocationRequestUpdateDto dto){
-        LocationRequestResponseDto request = locationRequestService.updateRequestStatus(id, dto);
+    @PatchMapping("/{requestId}")
+    public ResponseEntity<LocationRequestResponseDto> updateRequestStatus(@PathVariable UUID requestId, @RequestBody @Valid LocationRequestUpdateDto dto){
+        LocationRequestResponseDto request = locationRequestService.updateRequestStatus(requestId, dto);
         return ResponseEntity.ok(request);
     }
 

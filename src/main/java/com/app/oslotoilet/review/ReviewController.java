@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/reviews")
+@RequestMapping("/api/v1")
 public class ReviewController {
 
 
@@ -24,31 +24,25 @@ public class ReviewController {
     }
 
 
-    @GetMapping
-    public ResponseEntity<List<ReviewResponseDto>> getReviews(){
-        List<ReviewResponseDto> reviews = reviewService.getReviews();
+    @GetMapping("/reviews")
+    public ResponseEntity<List<ReviewResponseDto>> getReviews(@RequestParam(required = false) UUID toiletId, @RequestParam(required = false) UUID userId){
+        List<ReviewResponseDto> reviews = reviewService.getReviews(toiletId, userId);
         return ResponseEntity.ok(reviews);
     }
 
-    @GetMapping("/toilet/{toiletId}")
-    public ResponseEntity<List<ReviewResponseDto>> getReviewsByToiletId(@PathVariable UUID toiletId){
-        List<ReviewResponseDto> reviews = reviewService.getReviewsByToiletId(toiletId);
+    @GetMapping("/toilets/{toiletId}/reviews")
+    public ResponseEntity<List<ReviewResponseDto>> getReviewsForToilet(@PathVariable UUID toiletId){
+        List<ReviewResponseDto> reviews = reviewService.getReviewsForToilet(toiletId);
         return ResponseEntity.ok(reviews);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ReviewResponseDto>> getReviewsByUserId(@PathVariable UUID userId){
-        List<ReviewResponseDto> reviews = reviewService.getReviewsByUserId(userId);
-        return ResponseEntity.ok(reviews);
-    }
-
-    @PostMapping
+    @PostMapping("/reviews")
     public ResponseEntity<ReviewResponseDto> createReview(@Valid @RequestBody ReviewRequestDto request, @AuthenticationPrincipal SecurityUser currentUser) {
         ReviewResponseDto createdReview = reviewService.createReview(request, currentUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdReview);
     }
 
-    @DeleteMapping("/{reviewId}")
+    @DeleteMapping("/reviews/{reviewId}")
     public ResponseEntity<Void> deleteReview(@PathVariable UUID reviewId, @AuthenticationPrincipal SecurityUser currentUser) {
         reviewService.deleteReview(reviewId, currentUser);
         return ResponseEntity.noContent().build();
