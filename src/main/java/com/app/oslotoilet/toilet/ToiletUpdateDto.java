@@ -31,7 +31,7 @@ public class ToiletUpdateDto {
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
 
-    @Size(max = 1000, message = "Description cannot exceed 1000 characters")
+    @Size(max = 1000, message = "Conditions cannot exceed 1000 characters")
     private String conditions;
 
 }

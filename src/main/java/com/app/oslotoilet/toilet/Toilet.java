@@ -59,7 +59,7 @@ public class Toilet {
     private String description;
 
     @Column(columnDefinition = "TEXT")
-    @Size(max = 1000, message = "Description cannot exceed 1000 characters")
+    @Size(max = 1000, message = "Conditions cannot exceed 1000 characters")
     private String conditions;
 
     @Column(name = "always_open", nullable = false)
