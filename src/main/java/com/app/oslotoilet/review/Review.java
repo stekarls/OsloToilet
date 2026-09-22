@@ -39,19 +39,19 @@ public class Review {
     @NotNull(message = "Cleanliness rating is required")
     private Short cleanliness;
 
-    @Min(value = 1, message = "Accessibility rating must be at least 1")
-    @Max(value = 5, message = "Accessibility rating cannot exceed 5")
+    @Min(value = 1, message = "Equipment rating must be at least 1")
+    @Max(value = 5, message = "Equipment rating cannot exceed 5")
     @NotNull(message = "Equipment rating is required")
     @Column(name = "rating_equipment")
     private Short equipment;
 
-    @Min(value = 1, message = "Accessibility rating must be at least 1")
-    @Max(value = 5, message = "Accessibility rating cannot exceed 5")
+    @Min(value = 1, message = "Access rating must be at least 1")
+    @Max(value = 5, message = "Access rating cannot exceed 5")
     @NotNull(message = "Access rating is required")
     @Column(name = "rating_access")
     private Short access;
 
-    @Column(name = "average_rating")
+    @Column(name = "average_rating", nullable = false)
     private double averageRating;
 
 

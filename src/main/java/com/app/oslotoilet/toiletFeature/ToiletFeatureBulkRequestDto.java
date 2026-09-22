@@ -1,6 +1,5 @@
 package com.app.oslotoilet.toiletFeature;
 
-import com.app.oslotoilet.enums.SourceType;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -15,8 +14,5 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ToiletFeatureBulkRequestDto {
     @NotEmpty(message = "Feature IDs cannot be empty")
-    private List<@NotNull UUID> featureIds;
-
-    @NotNull(message = "Source is required")
-    private SourceType source;
+    private List<@NotNull UUID> featureIds;
 }

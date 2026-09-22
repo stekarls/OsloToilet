@@ -1,9 +1,11 @@
 package com.app.oslotoilet.locationRequest;
 
+import com.app.oslotoilet.enums.FeatureCode;
+import com.app.oslotoilet.enums.PaymentCode;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import java.math.BigDecimal;
-import java.util.UUID;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -11,9 +13,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class LocationRequestDto {
-
-    @NotNull(message = "User ID is required")
-    private UUID userId;
 
     @NotBlank(message = "Name is required")
     @Size(min = 5, max = 64, message = "Toilet name must be between 5 and 64 characters")
@@ -31,14 +30,20 @@ public class LocationRequestDto {
     @NotBlank(message = "Description is required")
     private String description;
 
-    private boolean hasFee;
+    @NotNull(message = "hasFee is required")
+    private Boolean hasFee;
 
     @DecimalMin(value = "0.0", inclusive = false, message = "Fee must be greater than 0")
     private BigDecimal fee;
 
+    //Optional, the user may not know what the toilet offers
+    private Set<@NotNull FeatureCode> featureCodes;
+
+    private Set<@NotNull PaymentCode> paymentCodes;
+
     @SuppressWarnings("unused")
     @AssertTrue(message = "A fee amount greater than 0 is required when hasFee is true")
     private boolean isFeeConsistent() {
-        return !hasFee || (fee != null && fee.compareTo(BigDecimal.ZERO) > 0);
+        return hasFee == null || !hasFee || (fee != null && fee.compareTo(BigDecimal.ZERO) > 0);
     }
 }

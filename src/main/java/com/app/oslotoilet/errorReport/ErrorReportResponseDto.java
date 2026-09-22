@@ -2,8 +2,6 @@ package com.app.oslotoilet.errorReport;
 
 
 import com.app.oslotoilet.enums.RequestStatus;
-import com.app.oslotoilet.toilet.Toilet;
-import com.app.oslotoilet.user.User;
 import lombok.*;
 
 import java.time.OffsetDateTime;

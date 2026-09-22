@@ -28,8 +28,13 @@ public class UserService {
         return userRepository.findAll().stream().map(this::mapToResponseDto).toList();
     }
 
-    public List<UserResponseDto> sortByContributionPoints(){
-        return userRepository.findAllByOrderByContributionPointsDesc().stream().map(this::mapToResponseDto).toList();
+    public List<LeaderboardEntryDto> getLeaderboard(){
+        return userRepository.findAllByOrderByContributionPointsDesc().stream()
+                .map(user -> LeaderboardEntryDto.builder()
+                        .nickname(user.getNickname())
+                        .contributionPoints(user.getContributionPoints())
+                        .build())
+                .toList();
     }
 
     public UserResponseDto getUserById(UUID userId){

@@ -32,17 +32,28 @@ public class ReviewService {
     }
 
 
-    public List<ReviewResponseDto> getReviews(){
-        return reviewRepository.findAll().stream().map(this::mapToResponseDto).toList();
+    //Both filters are optional and can be combined
+    public List<ReviewResponseDto> getReviews(UUID toiletId, UUID userId){
+        List<Review> reviews;
+
+        if (toiletId != null && userId != null) {
+            reviews = reviewRepository.findByToiletIdAndUserId(toiletId, userId);
+        } else if (toiletId != null) {
+            reviews = reviewRepository.findByToiletId(toiletId);
+        } else if (userId != null) {
+            reviews = reviewRepository.findByUserId(userId);
+        } else {
+            reviews = reviewRepository.findAll();
+        }
+
+        return reviews.stream().map(this::mapToResponseDto).toList();
     }
 
-    public List<ReviewResponseDto> getReviewsByToiletId(UUID toiletId) {
+    public List<ReviewResponseDto> getReviewsForToilet(UUID toiletId) {
+        if (!toiletRepository.existsById(toiletId)) {
+            throw new EntityNotFoundException("Toilet not found with id: " + toiletId);
+        }
         return reviewRepository.findByToiletId(toiletId).stream().map(this::mapToResponseDto).toList();
-    }
-
-
-    public List<ReviewResponseDto> getReviewsByUserId(UUID userId) {
-        return reviewRepository.findByUserId(userId).stream().map(this::mapToResponseDto).toList();
     }
 
 
@@ -75,13 +86,17 @@ public class ReviewService {
         if (!isAdmin && !review.getUser().getId().equals(currentUser.getUser().getId())){
             throw new AccessDeniedException("You can only delete your own reviews");
         }
-        reviewRepository.deleteById(reviewId);
+        //Take back the points the author earned for the review, without going below zero
+        User author = review.getUser();
+        author.setContributionPoints(Math.max(0, author.getContributionPoints() - ContributionPoints.REVIEW.getValue()));
+
+        reviewRepository.delete(review);
     }
 
 
 
     private Review mapToEntity(ReviewRequestDto reviewRequestDto, User user, Toilet toilet){
-        double averageRating = getAverageRating(reviewRequestDto.getCleanliness(), reviewRequestDto.getAccess(), reviewRequestDto.getEquipment());
+        double averageRating = getAverageRating(reviewRequestDto.getCleanliness(), reviewRequestDto.getEquipment(), reviewRequestDto.getAccess());
         return Review.builder()
                 .user(user)
                 .toilet(toilet)
@@ -109,7 +124,7 @@ public class ReviewService {
                 .build();
     }
 
-    public double getAverageRating(Short cleanliness, Short equipment, Short access){
+    private double getAverageRating(Short cleanliness, Short equipment, Short access){
         return (cleanliness + equipment + access) / 3.0;
     }
 }

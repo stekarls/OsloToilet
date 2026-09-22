@@ -27,11 +27,6 @@ public class UserController {
     }
 
 
-    @GetMapping("/contribution")
-    public ResponseEntity<List<UserResponseDto>> sortByContributionPoints(){
-        return ResponseEntity.ok(userService.sortByContributionPoints());
-    }
-
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.user.id")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable UUID id){

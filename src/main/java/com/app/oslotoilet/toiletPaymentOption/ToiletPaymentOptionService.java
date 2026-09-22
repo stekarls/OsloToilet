@@ -1,5 +1,6 @@
 package com.app.oslotoilet.toiletPaymentOption;
 
+import com.app.oslotoilet.enums.SourceType;
 import com.app.oslotoilet.paymentOption.PaymentOption;
 import com.app.oslotoilet.paymentOption.PaymentOptionRepository;
 import com.app.oslotoilet.toilet.Toilet;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -52,7 +54,8 @@ public class ToiletPaymentOptionService {
         ToiletPaymentOption toiletPaymentOption = ToiletPaymentOption.builder()
                 .toilet(toilet)
                 .paymentOption(paymentOption)
-                .source(dto.getSource())
+                .source(SourceType.ADMIN)
+                .verifiedAt(OffsetDateTime.now())
                 .build();
 
         return mapToResponseDto(toiletPaymentOptionRepository.save(toiletPaymentOption));
@@ -83,7 +86,8 @@ public class ToiletPaymentOptionService {
                 .map(po -> ToiletPaymentOption.builder()
                         .toilet(toilet)
                         .paymentOption(po)
-                        .source(dto.getSource())
+                        .source(SourceType.ADMIN)
+                        .verifiedAt(OffsetDateTime.now())
                         .build())
                 .toList();
 
@@ -92,6 +96,22 @@ public class ToiletPaymentOptionService {
         }
 
         return toiletPaymentOptionRepository.saveAll(toSave).stream().map(this::mapToResponseDto).toList();
+    }
+
+    //Used when a location request is approved
+    @Transactional
+    public void addUserContributedPaymentOptions(UUID toiletId, Collection<PaymentOption> paymentOptions){
+        Toilet toilet = toiletRepository.findById(toiletId).orElseThrow(() -> new EntityNotFoundException("Toilet not found with id " + toiletId));
+
+        List<ToiletPaymentOption> toSave = paymentOptions.stream()
+                .map(po -> ToiletPaymentOption.builder()
+                        .toilet(toilet)
+                        .paymentOption(po)
+                        .source(SourceType.USER_CONTRIBUTION)
+                        .build())
+                .toList();
+
+        toiletPaymentOptionRepository.saveAll(toSave);
     }
 
     @Transactional
@@ -121,6 +141,7 @@ public class ToiletPaymentOptionService {
                 .toiletId(toiletPaymentOption.getToilet().getId())
                 .paymentCode(toiletPaymentOption.getPaymentOption().getCode())
                 .verifiedAt(toiletPaymentOption.getVerifiedAt())
+                .source(toiletPaymentOption.getSource())
                 .build();
     }
 

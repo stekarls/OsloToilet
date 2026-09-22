@@ -1,5 +1,6 @@
 package com.app.oslotoilet.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -7,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -35,18 +37,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(7);
-        String userId = jwtService.extractUserId(token);
-        //TODO: gets 500 on bad tokens, isTokenValid is not reached for expired token. extract user will throw
-        if(userId != null && SecurityContextHolder.getContext().getAuthentication() == null){
-            SecurityUser securityUser = (SecurityUser) customUserDetailsService.loadUserById(userId);
 
-            if (jwtService.isTokenValid(token, userId) && securityUser.isAccountNonLocked()) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(securityUser, null, securityUser.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+        try{
+            String userId = jwtService.extractUserId(token);
+            if(userId != null && SecurityContextHolder.getContext().getAuthentication() == null){
+                SecurityUser securityUser = (SecurityUser) customUserDetailsService.loadUserById(userId);
+
+                if (securityUser.isAccountNonLocked()) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(securityUser, null, securityUser.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
-        }
+        }catch (JwtException | IllegalArgumentException | UsernameNotFoundException ex){
+            SecurityContextHolder.clearContext();
 
+        }
         filterChain.doFilter(request, response);
+
     }
 }

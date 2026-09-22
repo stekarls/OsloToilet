@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
@@ -42,6 +43,12 @@ public class GlobalExceptionHandler{
                 .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
                 .collect(Collectors.joining(","));
         return buildResponse(HttpStatus.BAD_REQUEST, message, request);
+    }
+
+    //Body that cannot be read as JSON, or a value of the wrong type, e.g. an unknown feature code
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> httpMessageNotReadableException(HttpMessageNotReadableException ex, HttpServletRequest request){
+        return buildResponse(HttpStatus.BAD_REQUEST, "The request body is malformed or contains an invalid value", request);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
