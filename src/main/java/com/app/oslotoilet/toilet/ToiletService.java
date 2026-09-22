@@ -34,12 +34,13 @@ public class ToiletService {
     public ToiletResponseDto createToilet(ToiletRequestDto dto){
         validateToiletClosed(dto.isAlwaysOpen(), dto.isClosed());
         validateFee(dto.getFee(), dto.isHasFee());
+        String name = normalizeName(dto.getName());
 
-        if (toiletRepository.existsByNameIgnoreCase(dto.getName())) {
-            throw new IllegalStateException("A toilet with the name '" + dto.getName() + "' already exists");
+        if (toiletRepository.existsByNameIgnoreCase(name)) {
+            throw new IllegalStateException("A toilet with the name '" + name + "' already exists");
         }
 
-        Toilet toilet = toiletRepository.save(mapToEntity(dto));
+        Toilet toilet = toiletRepository.save(mapToEntity(dto, name));
         return mapToResponseDto(toilet);
 
     }
@@ -52,10 +53,11 @@ public class ToiletService {
 
 
         if (dto.getName() != null) {
-            if (toiletRepository.existsByNameIgnoreCaseAndIdNot(dto.getName(), toiletId)) {
-                throw new IllegalStateException("A toilet with the name '" + dto.getName() + "' already exists");
+            String name = normalizeName(dto.getName());
+            if (toiletRepository.existsByNameIgnoreCaseAndIdNot(name, toiletId)) {
+                throw new IllegalStateException("A toilet with the name '" + name + "' already exists");
             }
-            toilet.setName(dto.getName());
+            toilet.setName(name);
         }
         if (dto.getLatitude() != null) toilet.setLatitude(dto.getLatitude());
         if (dto.getLongitude() != null) toilet.setLongitude(dto.getLongitude());
@@ -86,7 +88,6 @@ public class ToiletService {
         validateToiletClosed(toilet.isAlwaysOpen(), toilet.isClosed());
         validateFee(toilet.getFee(), toilet.isHasFee());
 
-        //Flushing runs @PreUpdate now, so the response carries the new updatedAt when something changed
         toiletRepository.saveAndFlush(toilet);
         return mapToResponseDto(toilet);
     }
@@ -131,29 +132,38 @@ public class ToiletService {
     }
     private void validateToiletClosed(boolean alwaysOpen, boolean closed) {
         if (alwaysOpen && closed) {
-            throw new IllegalStateException("A toilet cannot be both always open and closed");
+            throw new IllegalArgumentException("A toilet cannot be both always open and closed");
         }
     }
 
     private void validateFee(BigDecimal fee, boolean hasFee){
         if (hasFee) {
             if (fee == null || fee.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalStateException("Fee must be a value greater than 0 when hasFee is true");
+                throw new IllegalArgumentException("Fee must be a value greater than 0 when hasFee is true");
             }
         }else {
             if (fee != null) {
-                throw new IllegalStateException("Fee must be null when hasFee is false");
+                throw new IllegalArgumentException("Fee must be null when hasFee is false");
             }
         }
     }
-    private Toilet mapToEntity(ToiletRequestDto toiletRequestDto){
+
+    private String normalizeName(String name){
+        String trimmed = name.trim();
+        if (trimmed.length() < 5 || trimmed.length() > 64) {
+            throw new IllegalArgumentException("Toilet name must be between 5 and 64 characters");
+        }
+        return trimmed;
+    }
+
+    private Toilet mapToEntity(ToiletRequestDto toiletRequestDto, String name){
         String conditions = toiletRequestDto.getConditions();
         if (conditions != null && conditions.isBlank()) {
             conditions = null;
         }
 
         return Toilet.builder()
-                .name(toiletRequestDto.getName())
+                .name(name)
                 .latitude(toiletRequestDto.getLatitude())
                 .longitude(toiletRequestDto.getLongitude())
                 .hasFee(toiletRequestDto.isHasFee())

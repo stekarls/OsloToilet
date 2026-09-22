@@ -191,7 +191,7 @@ public class ToiletServiceTests {
                     .fee(fee == null ? null : new BigDecimal(fee))
                     .build();
 
-            assertThrows(IllegalStateException.class, () -> toiletService.createToilet(request));
+            assertThrows(IllegalArgumentException.class, () -> toiletService.createToilet(request));
 
             verify(toiletRepository, never()).save(any());
         }
@@ -200,7 +200,7 @@ public class ToiletServiceTests {
         void createToilet_shouldRejectFreeToilet_andSaveNothing_whenAFeeIsGiven() {
             ToiletRequestDto request = validFreeToiletRequest().fee(FEE).build();
 
-            assertThrows(IllegalStateException.class, () -> toiletService.createToilet(request));
+            assertThrows(IllegalArgumentException.class, () -> toiletService.createToilet(request));
 
             verify(toiletRepository, never()).save(any());
         }
@@ -209,7 +209,7 @@ public class ToiletServiceTests {
         void createToilet_shouldReject_andSaveNothing_whenToiletIsBothAlwaysOpenAndClosed() {
             ToiletRequestDto request = validFreeToiletRequest().alwaysOpen(true).isClosed(true).build();
 
-            assertThrows(IllegalStateException.class, () -> toiletService.createToilet(request));
+            assertThrows(IllegalArgumentException.class, () -> toiletService.createToilet(request));
 
             verify(toiletRepository, never()).save(any());
         }
@@ -219,6 +219,47 @@ public class ToiletServiceTests {
             when(toiletRepository.existsByNameIgnoreCase(NAME)).thenReturn(true);
 
             assertThrows(IllegalStateException.class, () -> toiletService.createToilet(validFreeToiletRequest().build()));
+
+            verify(toiletRepository, never()).save(any());
+        }
+
+        @Test
+        void createToilet_shouldTrimTheName_beforeCheckingAndSavingIt() {
+            givenNameIsFreeAndSaveSucceeds();
+
+            toiletService.createToilet(validFreeToiletRequest().name("  " + NAME + "  ").build());
+
+            assertEquals(NAME, savedToilet().getName());
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints = {5, 64})
+        void createToilet_shouldAcceptNames_atTheLengthLimits(int length) {
+            String name = "x".repeat(length);
+            when(toiletRepository.existsByNameIgnoreCase(name)).thenReturn(false);
+            when(toiletRepository.save(any(Toilet.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            toiletService.createToilet(validFreeToiletRequest().name(name).build());
+
+            assertEquals(name, savedToilet().getName());
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints = {4, 65})
+        void createToilet_shouldReject_andSaveNothing_whenNameIsOutsideTheLengthLimits(int length) {
+            ToiletRequestDto request = validFreeToiletRequest().name("x".repeat(length)).build();
+
+            assertThrows(IllegalArgumentException.class, () -> toiletService.createToilet(request));
+
+            verify(toiletRepository, never()).save(any());
+        }
+
+        //"  abcd  " is 8 characters, so it passes the request's length check, but only 4 remain after trimming
+        @Test
+        void createToilet_shouldReject_andSaveNothing_whenNameIsTooShortOnceTrimmed() {
+            ToiletRequestDto request = validFreeToiletRequest().name("  abcd  ").build();
+
+            assertThrows(IllegalArgumentException.class, () -> toiletService.createToilet(request));
 
             verify(toiletRepository, never()).save(any());
         }
@@ -276,7 +317,6 @@ public class ToiletServiceTests {
             assertFalse(response.isSeasonal());
             assertFalse(response.isClosed());
             assertEquals(CREATED, response.getAdded());
-            //updatedAt is only refreshed by Hibernate when a value really changed, see ToiletServiceIntegrationTests
             assertEquals(CREATED, response.getUpdatedAt());
         }
 
@@ -328,13 +368,31 @@ public class ToiletServiceTests {
         @Test
         void updateToilet_shouldAllowResendingTheToiletsOwnName() {
             givenExistingToilet();
-            //The name does exist in the database, but only on this toilet, which must not count as a conflict
-            lenient().when(toiletRepository.existsByNameIgnoreCase(NAME)).thenReturn(true);
             when(toiletRepository.existsByNameIgnoreCaseAndIdNot(NAME, toiletId)).thenReturn(false);
 
             ToiletResponseDto response = toiletService.updateToilet(ToiletUpdateDto.builder().name(NAME).build(), toiletId);
 
             assertEquals(NAME, response.getName());
+        }
+
+        @Test
+        void updateToilet_shouldTrimTheName_beforeCheckingAndSavingIt() {
+            givenExistingToilet();
+            when(toiletRepository.existsByNameIgnoreCaseAndIdNot(OTHER_NAME, toiletId)).thenReturn(false);
+
+            ToiletResponseDto response = toiletService.updateToilet(ToiletUpdateDto.builder().name("  " + OTHER_NAME + " ").build(), toiletId);
+
+            assertEquals(OTHER_NAME, response.getName());
+        }
+
+        @Test
+        void updateToilet_shouldReject_andSaveNothing_whenNameIsTooShortOnceTrimmed() {
+            givenExistingToilet();
+            ToiletUpdateDto patch = ToiletUpdateDto.builder().name("  abcd  ").build();
+
+            assertThrows(IllegalArgumentException.class, () -> toiletService.updateToilet(patch, toiletId));
+
+            verify(toiletRepository, never()).saveAndFlush(any());
         }
     }
 
@@ -379,7 +437,7 @@ public class ToiletServiceTests {
         void updateToilet_shouldReject_whenHasFeeIsFalseButAFeeIsSent() {
             ToiletUpdateDto patch = ToiletUpdateDto.builder().hasFee(false).fee(new BigDecimal("10.00")).build();
 
-            assertThrows(IllegalStateException.class, () -> toiletService.updateToilet(patch, toiletId));
+            assertThrows(IllegalArgumentException.class, () -> toiletService.updateToilet(patch, toiletId));
         }
 
         @Test
@@ -387,7 +445,7 @@ public class ToiletServiceTests {
             makeExistingToiletFree();
             ToiletUpdateDto patch = ToiletUpdateDto.builder().hasFee(true).build();
 
-            assertThrows(IllegalStateException.class, () -> toiletService.updateToilet(patch, toiletId));
+            assertThrows(IllegalArgumentException.class, () -> toiletService.updateToilet(patch, toiletId));
         }
 
         @Test
@@ -395,7 +453,7 @@ public class ToiletServiceTests {
             makeExistingToiletFree();
             ToiletUpdateDto patch = ToiletUpdateDto.builder().fee(new BigDecimal("30.00")).build();
 
-            assertThrows(IllegalStateException.class, () -> toiletService.updateToilet(patch, toiletId));
+            assertThrows(IllegalArgumentException.class, () -> toiletService.updateToilet(patch, toiletId));
         }
 
         @ParameterizedTest
@@ -403,7 +461,7 @@ public class ToiletServiceTests {
         void updateToilet_shouldReject_whenFeeIsNotPositive(String fee) {
             ToiletUpdateDto patch = ToiletUpdateDto.builder().fee(new BigDecimal(fee)).build();
 
-            assertThrows(IllegalStateException.class, () -> toiletService.updateToilet(patch, toiletId));
+            assertThrows(IllegalArgumentException.class, () -> toiletService.updateToilet(patch, toiletId));
         }
     }
 
@@ -420,7 +478,7 @@ public class ToiletServiceTests {
         void updateToilet_shouldReject_whenPatchWouldLeaveToiletBothAlwaysOpenAndClosed() {
             ToiletUpdateDto patch = ToiletUpdateDto.builder().closed(true).build();
 
-            assertThrows(IllegalStateException.class, () -> toiletService.updateToilet(patch, toiletId));
+            assertThrows(IllegalArgumentException.class, () -> toiletService.updateToilet(patch, toiletId));
         }
 
         @Test
@@ -482,6 +540,8 @@ public class ToiletServiceTests {
             assertThrows(EntityNotFoundException.class, () -> toiletService.findById(toiletId));
         }
 
+        //Runs once per row in supportedSortKeys(): a sort key and the repository method that should handle it.
+        //Only that method is stubbed, and unstubbed methods return an empty list, so a wrong ordering leaves the result empty
         @ParameterizedTest
         @MethodSource("com.app.oslotoilet.services.ToiletServiceTests#supportedSortKeys")
         void findAll_shouldUseTheMatchingOrdering_regardlessOfCase(String sortKey, Function<ToiletRepository, List<Toilet>> ordering) {
@@ -493,6 +553,7 @@ public class ToiletServiceTests {
             assertEquals(NAME, result.get(0).getName());
         }
 
+        //Runs for null, "" and each unknown key. Only the unsorted findAll() is stubbed, so a key that wrongly matched an ordering would return an empty list
         @ParameterizedTest
         @NullAndEmptySource
         @ValueSource(strings = {"nameAsk", "priceAsc", "name asc"})

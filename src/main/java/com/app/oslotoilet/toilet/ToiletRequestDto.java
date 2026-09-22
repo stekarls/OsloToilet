@@ -14,8 +14,7 @@ import java.math.BigDecimal;
 public class ToiletRequestDto {
 
     @NotBlank
-    @Size(min = 5, message = "Name must be 5 characters in length or more")
-    @Size(max = 128, message = "Description cannot exceed 128 characters")
+    @Size(min = 5, max = 64, message = "Toilet name must be between 5 and 64 characters")
     private String name;
 
     @NotNull(message = "Latitude is required")

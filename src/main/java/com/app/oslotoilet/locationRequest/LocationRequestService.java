@@ -135,7 +135,7 @@ public class LocationRequestService {
 
     private void validateFee(BigDecimal fee, boolean hasFee){
         if (hasFee && (fee == null || fee.compareTo(BigDecimal.ZERO) <= 0)) {
-            throw new IllegalStateException("Fee must be a value greater than 0 when hasFee is true");
+            throw new IllegalArgumentException("Fee must be a value greater than 0 when hasFee is true");
         }
     }
 
