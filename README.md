@@ -35,21 +35,31 @@ OsloToilet lets users find public toilets, see their features (wheelchair access
 The project follows a layered architecture, with each resource organized as its own package:
 
 ```
-com.app.oslotoilet
+src/main/java/com/app/oslotoilet
 ├── auth/                  # Registration, login, JWT issuance
-├── security/              # SecurityConfig, JwtService, JwtAuthFilter, SecurityUser
-├── enums/                 # Role, RequestStatus, FeatureCode, PaymentCode, SourceType
-├── exception/             # Global exception handling
-├── user/                  # User management
-├── toilet/                # Core toilet resource
-├── feature/                    # Reference table: available features
-├── toiletFeature/               # Join table: toilet ↔ feature
-├── paymentOption/               # Reference table: available payment methods
-├── toiletPaymentOption/          # Join table: toilet ↔ payment option
-├── openingHours/           # Per-day opening hours
-├── review/                 # User reviews
-├── errorReport/            # User-reported issues
-└── locationRequest/        # User-submitted new toilet suggestions
+├── security/              # SecurityConfig, JwtService, JwtAuthFilter, SecurityUser, CustomUserDetailsService
+├── config/                # ClockConfig (injectable Clock, used for Oslo-time calculations)
+├── enums/                 # Role, RequestStatus, FeatureCode, PaymentCode, SourceType, ContributionPoints
+├── exception/             # GlobalExceptionHandler and ErrorResponse
+├── user/                  # User management and contribution-points leaderboard
+├── toilet/                # Core toilet resource, including map markers
+├── feature/               # Reference table: available features
+├── toiletFeature/         # Join table: toilet ↔ feature
+├── paymentOption/         # Reference table: available payment methods
+├── toiletPaymentOption/   # Join table: toilet ↔ payment option
+├── openingHours/          # Per-day opening hours
+├── review/                # User reviews
+├── errorReport/           # User-reported issues
+└── locationRequest/       # User-submitted new toilet suggestions
+
+src/main/resources
+├── application.properties
+└── db/migration/          # Flyway migrations (V1__initial_schema.sql … V6__…)
+
+src/test/java/com/app/oslotoilet
+├── TestContainerConfig.java   # PostgreSQL Testcontainers setup
+├── repositories/              # Repository tests
+└── services/                  # Service tests
 ```
 
 Each resource package typically contains:
